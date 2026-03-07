@@ -1,6 +1,6 @@
 LEAF: A MARKDOWN EDITOR
 Vibe coded by Dan (c) 2026
-Version 1.2.1
+Version 1.2.2
 
 ================================================================================
 WHAT IS LEAF?
@@ -160,6 +160,7 @@ KEYBOARD SHORTCUTS
   Ctrl+4          Heading 4 (toggle)
   Ctrl+Shift+F    Toggle focus mode
   Ctrl+Shift+P    Toggle preview mode
+  Ctrl+Shift+S    Toggle split view
   Ctrl+N          New tab
   Ctrl+W          Close current tab
   Ctrl+[          Previous tab
@@ -223,6 +224,15 @@ restore your last autosaved draft.
 ================================================================================
 CHANGELOG
 ================================================================================
+
+v1.2.2
+  - Ctrl+Shift+S toggles split view
+  - Split view scroll sync: editor and preview scroll together in real time
+  - Scroll sync snaps preview into position when entering split mode
+  - Sync toggle button (⇅/↕) on the split divider — click to lock or free scrolling
+  - Last pane scrolled determines sync position when re-enabling scroll lock
+  - Scroll sync preference remembered between sessions
+  - Browser title bar shortened to "Leaf: A Markdown Editor" 
 
 v1.2.1
   - Welcome message toggle persists correctly between sessions
