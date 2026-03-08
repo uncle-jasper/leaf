@@ -43,11 +43,10 @@ To create a desktop shortcut, right-click Leaf.bat and choose
 Send to > Desktop (create shortcut).
 
 OPTION 3 - Install as a PWA (Chrome / Edge)
-Run a local server first:
-  python -m http.server 8080
-Then open http://localhost:8080/editor.html in Chrome. An install button
-will appear in the toolbar. Click it to install Leaf as a standalone app.
-Once installed, you can stop the server -- the app works offline from then on.
+Open https://uncle-jasper.github.io/leaf/editor.html in Chrome or Edge.
+An install button will appear in the address bar or browser menu.
+Click it to install Leaf as a standalone app with its own window and icon.
+Once installed, Leaf works fully offline.
 
 OPTION 4 - Mac app (Platypus)
 See the Mac App section below.
@@ -124,7 +123,9 @@ THEMES
   dark        Near-black with cool grey text
   moss        Dark green
   slate       Dark blue-grey
-  terminal    Black with dimmed green phosphor text
+  terminal    Black with dimmed green phosphor text. Includes an optional
+              CRT mode ([CRT] in toolbar) — a fun retro nod to the monochrome
+              green monitors of the 80s.
   custom      Pick your own colours using the colour picker or hex code input
 
 Settings (theme, font, size, autohide, pin state) are remembered between
