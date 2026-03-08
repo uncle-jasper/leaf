@@ -1,6 +1,6 @@
 LEAF: A MARKDOWN EDITOR
 Vibe coded by Dan (c) 2026
-Version 1.2.2
+Version 1.3
 
 ================================================================================
 WHAT IS LEAF?
@@ -224,6 +224,13 @@ restore your last autosaved draft.
 ================================================================================
 CHANGELOG
 ================================================================================
+
+v1.3
+  - CRT mode for terminal theme: scanlines, phosphor glow, screen flicker, vignette, pixel text rendering
+  - Underscore cursor in terminal theme for authentic 80s word processor feel
+  - [CRT] toggle in toolbar — only visible in terminal theme, strikethrough when disabled
+  - CRT preference remembered between sessions
+  - Subtle always-on phosphor glow in terminal theme even when CRT is off
 
 v1.2.2
   - Ctrl+Shift+S toggles split view

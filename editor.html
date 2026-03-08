@@ -236,6 +236,7 @@
     overflow-y: auto;
     display: flex;
     justify-content: center;
+    position: relative;
     padding: 24px 5%;
     background: var(--bg);
     transition: background 0.3s;
@@ -277,6 +278,7 @@
     padding: 24px 5%;
     line-height: 1.8;
     outline: none;
+    position: relative;
     transition: background 0.3s, color 0.3s;
   }
 
@@ -475,11 +477,75 @@
   body[data-theme="paper"] { --bg:#f5f7fa; --surface:#eceef2; --text:#1a1d23; --accent:#4a6080; --muted:#8a96a8; --border:#d4d8e0; }
   body[data-theme="terminal"] { --bg:#0a0a0a; --surface:#0f0f0f; --text:#22cc22; --accent:#0a5c0a; --muted:#1a7a1a; --border:#1a3a1a; }
   body[data-theme="terminal"] #editor,
-  body[data-theme="terminal"] #preview { text-shadow: 0 0 8px rgba(51,255,51,0.35); }
-  body[data-theme="terminal"] #statusbar { text-shadow: 0 0 6px rgba(51,255,51,0.3); }
+  body[data-theme="terminal"] #preview {
+    text-shadow: 0 0 8px rgba(51,255,51,0.35);
+  }
+  body[data-theme="terminal"].crt-on #editor,
+  body[data-theme="terminal"].crt-on #preview {
+    text-shadow: 0 0 10px rgba(51,255,51,0.55), 0 0 3px rgba(51,255,51,0.7);
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: unset;
+  }
+  body[data-theme="terminal"] #statusbar { text-shadow: 0 0 6px rgba(51,255,51,0.4); }
   body[data-theme="terminal"] button,
   body[data-theme="terminal"] select,
-  body[data-theme="terminal"] #filename-input { color: var(--text); }
+  body[data-theme="terminal"] #filename-input { color: var(--text); text-shadow: 0 0 6px rgba(51,255,51,0.3); }
+
+
+
+  @keyframes crt-blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
+
+  /* CRT scanlines + flicker — terminal theme only */
+  @keyframes crt-flicker {
+    0%   { opacity: 1; }
+    92%  { opacity: 1; }
+    93%  { opacity: 0.93; }
+    94%  { opacity: 1; }
+    96%  { opacity: 0.96; }
+    97%  { opacity: 1; }
+    99%  { opacity: 0.97; }
+    100% { opacity: 1; }
+  }
+
+  body[data-theme="terminal"].crt-on {
+    animation: crt-flicker 8s infinite;
+  }
+
+  body[data-theme="terminal"].crt-on::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 1px,
+      rgba(0,0,0,0.25) 1px,
+      rgba(0,0,0,0.25) 3px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  body[data-theme="terminal"].crt-on::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(ellipse at center,
+      transparent 60%,
+      rgba(0,0,0,0.55) 100%
+    );
+    pointer-events: none;
+    z-index: 9998;
+  }
+
+  /* Underline cursor for terminal theme */
+  body[data-theme="terminal"] #editor {
+    caret-color: #33ff33;
+    caret-shape: underscore;
+  }
 
   @media (max-width: 600px) {
     #editor-scroll, #preview { padding: 28px 6%; }
@@ -582,6 +648,27 @@
     margin-top: 12px;
     opacity: 0.6;
   }
+  #btn-crt-toggle {
+    display: none;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 2px 6px;
+    background: none;
+    border: none;
+    color: var(--text);
+    opacity: 0.6;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    text-decoration: none;
+    letter-spacing: 0.05em;
+  }
+  #btn-crt-toggle:hover { opacity: 0.9; background: none; }
+  #btn-crt-toggle.crt-off {
+    opacity: 0.3;
+    text-decoration: line-through;
+  }
+  body[data-theme="terminal"] #btn-crt-toggle { display: inline-block; }
+
   #btn-about-close {
     font-size: 12px;
     padding: 5px 18px;
@@ -591,7 +678,7 @@
   }
 </style>
 </head>
-<body data-theme="dark">
+<body data-theme="dark" class="crt-on">
 
 <div id="header"><div id="toolbar">
   <div class="tool-group">
@@ -662,6 +749,7 @@
     <button id="btn-autohide" title="Auto-hide toolbar while typing">autohide</button>
     <button id="btn-focus" title="Focus mode (Esc to exit)">⛶ focus</button>
     <button id="btn-about" title="About Leaf">···</button>
+  <button id="btn-crt-toggle" title="Toggle CRT effects">[CRT]</button>
   </div>
   <div class="tool-group" id="install-group" style="display:none">
     <button id="btn-install" title="Install Leaf as an app" style="display:none" onclick="installPWA()">⊕ install app</button>
@@ -714,7 +802,7 @@
     <p class="about-credit">Vibe coded by Dan</p>
     <p class="about-copy">© 2026</p>
     <button id="btn-about-close">close</button>
-    <p class="about-version">v1.2.2</p>
+    <p class="about-version">v1.3</p>
   <div id="about-welcome-toggle" style="margin-top:14px; display:flex; align-items:center; gap:8px; justify-content:center;">
     <input type="checkbox" id="chk-welcome" style="cursor:pointer; accent-color:var(--accent);" checked>
     <label for="chk-welcome" style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); cursor:pointer; opacity:0.7;">show welcome message on launch</label>
@@ -882,6 +970,8 @@ function updateSyncIcon() {
   btn.textContent = scrollSynced ? '⇅' : '↕';
   btn.classList.toggle('synced', scrollSynced);
 }
+
+
 
 // ── Stats ─────────────────────────────────────────────────
 function updateStats() {
@@ -1405,6 +1495,7 @@ function saveSettings() {
     autohide:     autohideEnabled,
     tabPinned:    tabBarPinned,
     showWelcome:  document.getElementById('chk-welcome').checked,
+    crtEnabled:   document.body.classList.contains('crt-on'),
     scrollSynced: scrollSynced,
     customBg:     document.getElementById('color-bg').value,
     customText:   document.getElementById('color-text').value,
@@ -1455,6 +1546,13 @@ function loadSettings() {
     }
     if (s.showWelcome !== undefined) {
       document.getElementById('chk-welcome').checked = s.showWelcome;
+    }
+    const btn = document.getElementById('btn-crt-toggle');
+    if (s.crtEnabled !== undefined && !s.crtEnabled) {
+      document.body.classList.remove('crt-on');
+      btn.classList.add('crt-off');
+    } else {
+      btn.classList.remove('crt-off');
     }
     if (s.scrollSynced !== undefined) {
       scrollSynced = s.scrollSynced;
@@ -1691,6 +1789,13 @@ document.getElementById('btn-about').addEventListener('click', () => {
   document.getElementById('about-overlay').style.display = 'flex';
 });
 document.getElementById('chk-welcome').addEventListener('change', saveSettings);
+
+document.getElementById('btn-crt-toggle').addEventListener('click', () => {
+  const on = document.body.classList.toggle('crt-on');
+  const btn = document.getElementById('btn-crt-toggle');
+  btn.classList.toggle('crt-off', !on);
+  saveSettings();
+});
 
 document.getElementById('btn-about-close').addEventListener('click', () => {
   document.getElementById('about-overlay').style.display = 'none';
