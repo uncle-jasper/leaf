@@ -1,6 +1,6 @@
 LEAF: A MARKDOWN EDITOR
 Vibe coded by Dan (c) 2026
-Version 1.3
+Version 1.4
 
 ================================================================================
 WHAT IS LEAF?
@@ -111,7 +111,10 @@ STATUS BAR
   Shows live word count, character count, line count, and cursor position.
   When text is selected, shows the word and character count of the selection.
   Fades out in focus mode and reappears on hover.
-  Displays a random welcome message on launch (can be disabled in About).
+  Displays a random welcome message on launch.
+  Shows milestone messages at 100, 250, 500, 1000, 2000, and 5000 words.
+  Shows a quiet idle nudge after 3 minutes of inactivity.
+  All status messages can be disabled via the toggle in the About modal.
 
 
 ================================================================================
@@ -225,6 +228,16 @@ restore your last autosaved draft.
 ================================================================================
 CHANGELOG
 ================================================================================
+
+v1.4
+  - Word count milestone messages (100, 250, 500, 1000, 2000, 5000 words)
+  - Idle nudge messages after 3 minutes of inactivity
+  - All status messages controlled by a single toggle in the About modal
+  - Editor padding removed top and bottom — text runs flush to toolbar and status bar
+  - Scroll position now shared across all three modes (write, split, preview)
+  - Split view starts at the top of the document on first entry each session
+  - First-time users now correctly land on parchment theme
+  - Focus mode status bar background fixed
 
 v1.3
   - CRT mode for terminal theme: scanlines, phosphor glow, screen flicker, vignette, pixel text rendering

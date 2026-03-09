@@ -106,15 +106,16 @@
   }
   body.focus-mode #tab-bar { display: none; }
   body.focus-mode #statusbar {
-    background: transparent;
-    border-top: none;
     opacity: 0;
     transition: opacity 0.4s;
   }
   body.focus-mode:hover #statusbar,
   body.focus-mode #statusbar:hover { opacity: 1; }
   body.focus-mode #editor-scroll {
-    padding: 5vh 5%;
+    padding: 0 5%;
+  }
+  body.focus-mode #editor {
+    padding-top: 5vh;
   }
 
   #focus-hint {
@@ -237,7 +238,7 @@
     display: flex;
     justify-content: center;
     position: relative;
-    padding: 24px 5%;
+    padding: 0 5%;
     background: var(--bg);
     transition: background 0.3s;
   }
@@ -270,15 +271,18 @@
     max-width: 100%;
     min-width: 0;
     flex-shrink: 1;
+    padding-top: 24px;
   }
 
   #preview {
     flex: 1;
     overflow-y: auto;
-    padding: 24px 5%;
+    padding: 24px 5% 0;
     line-height: 1.8;
     outline: none;
     position: relative;
+    background: var(--bg);
+    color: var(--text);
     transition: background 0.3s, color 0.3s;
   }
 
@@ -548,7 +552,7 @@
   }
 
   @media (max-width: 600px) {
-    #editor-scroll, #preview { padding: 28px 6%; }
+    #editor-scroll { padding: 0 6%; } #preview { padding: 28px 6% 0; } #editor { padding-top: 28px; }
     .color-pair span { display: none; }
   }
 
@@ -678,7 +682,7 @@
   }
 </style>
 </head>
-<body data-theme="dark" class="crt-on">
+<body data-theme="parchment" class="crt-on">
 
 <div id="header"><div id="toolbar">
   <div class="tool-group">
@@ -802,15 +806,45 @@
     <p class="about-credit">Vibe coded by Dan</p>
     <p class="about-copy">© 2026</p>
     <button id="btn-about-close">close</button>
-    <p class="about-version">v1.3</p>
+    <p class="about-version">v1.4</p>
   <div id="about-welcome-toggle" style="margin-top:14px; display:flex; align-items:center; gap:8px; justify-content:center;">
     <input type="checkbox" id="chk-welcome" style="cursor:pointer; accent-color:var(--accent);" checked>
-    <label for="chk-welcome" style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); cursor:pointer; opacity:0.7;">show welcome message on launch</label>
+    <label for="chk-welcome" style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); cursor:pointer; opacity:0.7;">show status messages</label>
   </div>
   </div>
 </div>
 
-<script>
+<script>// ── Status bar typewriter ────────────────────────────────
+let statusMsgBusy = false;
+
+function typeStatusMessage(text) {
+  if (statusMsgBusy) return;
+  statusMsgBusy = true;
+
+  const msg = document.getElementById('welcome-msg');
+  let i = 0;
+
+  msg.style.display = 'block';
+  msg.style.opacity = '1';
+  msg.textContent   = '';
+
+  const typeTimer = setInterval(() => {
+    msg.textContent = text.substring(0, ++i);
+    if (i >= text.length) {
+      clearInterval(typeTimer);
+      setTimeout(() => {
+        msg.style.opacity = '0';
+        setTimeout(() => {
+          msg.style.display = 'none';
+          statusMsgBusy = false;
+        }, 500);
+      }, 1200);
+    }
+  }, 45);
+}
+
+
+
 const editor  = document.getElementById('editor');
 const preview = document.getElementById('preview');
 let currentMode = 'write';
@@ -853,40 +887,69 @@ function parseMarkdown(md) {
 function renderPreview() { preview.innerHTML = parseMarkdown(editor.value); }
 
 // ── Mode ─────────────────────────────────────────────────
+// ── Global scroll position ────────────────────────────────
+// One shared scroll percentage, updated on scroll in any view.
+// Applied when switching modes so all views stay in sync.
+let globalScrollPct = 0;
+
+function getScrollPct(editorEl, editorScrollEl) {
+  if (editorEl.scrollHeight > editorEl.clientHeight)
+    return editorEl.scrollTop / (editorEl.scrollHeight - editorEl.clientHeight);
+  if (editorScrollEl.scrollHeight > editorScrollEl.clientHeight)
+    return editorScrollEl.scrollTop / (editorScrollEl.scrollHeight - editorScrollEl.clientHeight);
+  return 0;
+}
+
+function applyScrollPct(el, pct) {
+  const max = el.scrollHeight - el.clientHeight;
+  if (max > 0) { el.scrollTop = pct * max; return; }
+  // Not ready yet — retry
+  let attempts = 0;
+  const retry = setInterval(() => {
+    const m = el.scrollHeight - el.clientHeight;
+    if (m > 0 || ++attempts > 20) {
+      clearInterval(retry);
+      if (m > 0) el.scrollTop = pct * m;
+    }
+  }, 20);
+}
+
 function setMode(mode) {
+  const scroll = document.getElementById('editor-scroll');
+  const editorEl = document.getElementById('editor');
+
+  // Save current scroll position before switching
+  if (currentMode === 'write') {
+    globalScrollPct = getScrollPct(editorEl, scroll);
+  } else if (currentMode === 'preview' || currentMode === 'split') {
+    const max = preview.scrollHeight - preview.clientHeight;
+    if (max > 0) globalScrollPct = preview.scrollTop / max;
+  }
+
   currentMode = mode;
   document.getElementById('mode-select').value = mode;
-  const scroll = document.getElementById('editor-scroll');
-  if (mode==='write') {
+
+  if (mode === 'write') {
     scroll.style.display=''; scroll.classList.remove('half'); preview.classList.remove('visible');
     document.body.classList.remove('split-mode');
-  } else if (mode==='split') {
+    applyScrollPct(editorEl, globalScrollPct);
+    applyScrollPct(scroll, globalScrollPct);
+
+  } else if (mode === 'split') {
     scroll.style.display=''; scroll.classList.add('half'); preview.classList.add('visible');
     document.body.classList.add('split-mode');
     renderPreview();
-    // Sync preview to editor position when entering split
-    const editorEl = document.getElementById('editor');
-    function doInitialSync() {
-      const source = editorEl.scrollTop > 0 ? editorEl : scroll;
-      const pct = source.scrollTop / Math.max(1, source.scrollHeight - source.clientHeight);
-      if (preview.scrollHeight <= preview.clientHeight && pct > 0) return false;
-      preview.scrollTop = pct * Math.max(1, preview.scrollHeight - preview.clientHeight);
-      return true;
-    }
-    const observer = new MutationObserver(() => {
-      observer.disconnect();
-      let attempts = 0;
-      function trySync() {
-        if (doInitialSync() || attempts++ > 20) return;
-        setTimeout(trySync, 50);
-      }
-      requestAnimationFrame(trySync);
-    });
-    observer.observe(preview, { childList: true, subtree: true });
+    setTimeout(() => {
+      applyScrollPct(editorEl, globalScrollPct);
+      applyScrollPct(scroll, globalScrollPct);
+      applyScrollPct(preview, globalScrollPct);
+    }, 30);
+
   } else {
     scroll.style.display='none'; scroll.classList.remove('half'); preview.classList.add('visible');
     document.body.classList.remove('split-mode');
     renderPreview();
+    setTimeout(() => applyScrollPct(preview, globalScrollPct), 30);
   }
 }
 
@@ -904,36 +967,58 @@ let lastScrolledPane = 'editor';
   const editorEl       = document.getElementById('editor');
   let syncSource = null; // which element triggered the current sync
 
+  let syncClearTimer = null;
+
+  function clearSyncSource() {
+    syncClearTimer = null;
+    syncSource = null;
+  }
+
+  function scheduleClear() {
+    if (syncClearTimer) clearTimeout(syncClearTimer);
+    syncClearTimer = setTimeout(clearSyncSource, 50);
+  }
+
   function syncToPreview(source) {
-    if (syncSource) return;
+    if (syncSource && syncSource !== source) return;
     syncSource = source;
     const pct = source.scrollTop / Math.max(1, source.scrollHeight - source.clientHeight);
     previewEl.scrollTop = pct * Math.max(1, previewEl.scrollHeight - previewEl.clientHeight);
-    requestAnimationFrame(() => { syncSource = null; });
+    scheduleClear();
   }
 
   function syncToEditor(source) {
-    if (syncSource) return;
+    if (syncSource && syncSource !== source) return;
     syncSource = source;
     const pct = source.scrollTop / Math.max(1, source.scrollHeight - source.clientHeight);
     const target = editorEl.scrollHeight > editorEl.clientHeight ? editorEl : editorScrollEl;
     target.scrollTop = pct * Math.max(1, target.scrollHeight - target.clientHeight);
-    requestAnimationFrame(() => { syncSource = null; });
+    scheduleClear();
   }
 
   editorScrollEl.addEventListener('scroll', () => {
+    const max = editorScrollEl.scrollHeight - editorScrollEl.clientHeight;
+    if (max > 0) globalScrollPct = editorScrollEl.scrollTop / max;
     if (currentMode !== 'split') return;
     lastScrolledPane = 'editor';
     if (scrollSynced && syncSource !== editorScrollEl) syncToPreview(editorScrollEl);
   }, { passive: true });
 
   editorEl.addEventListener('scroll', () => {
+    if (currentMode === 'write' || currentMode === 'split') {
+      const max = editorEl.scrollHeight - editorEl.clientHeight;
+      if (max > 0) globalScrollPct = editorEl.scrollTop / max;
+    }
     if (currentMode !== 'split') return;
     lastScrolledPane = 'editor';
     if (scrollSynced && syncSource !== editorEl) syncToPreview(editorEl);
   }, { passive: true });
 
   previewEl.addEventListener('scroll', () => {
+    if (currentMode === 'preview' || currentMode === 'split') {
+      const max = previewEl.scrollHeight - previewEl.clientHeight;
+      if (max > 0) globalScrollPct = previewEl.scrollTop / max;
+    }
     if (currentMode !== 'split') return;
     lastScrolledPane = 'preview';
     if (scrollSynced && syncSource !== previewEl) syncToEditor(previewEl);
@@ -974,11 +1059,60 @@ function updateSyncIcon() {
 
 
 // ── Stats ─────────────────────────────────────────────────
+// ── Word count milestones ─────────────────────────────────
+const milestones      = [100, 250, 500, 1000, 2000, 5000];
+const milestoneTexts  = [
+  '100 WORDS... RISE FROM YOUR GRAVE',
+  "250 WORDS... HE'S HEATING UP",
+  '500 WORDS... I HUNGER',
+  '1000 WORDS... YOU FEEL STRONGTH WELLING IN YOUR BODY',
+  '2000 WORDS... CONGRATULATION! YOU ARE A GREAT SOLDIER.',
+  '5000 WORDS... NOW GO AND REST OUR HEROES!'
+];
+let lastMilestone = 0;
+
+function checkMilestone(words) {
+  if (words < milestones[0]) { lastMilestone = 0; return; }
+  // Find the highest milestone reached that hasn't been shown yet
+  let next = -1;
+  for (let i = 0; i < milestones.length; i++) {
+    if (words >= milestones[i] && milestones[i] > lastMilestone) next = i;
+  }
+  if (next !== -1) {
+    lastMilestone = milestones[next];
+    if (document.getElementById('chk-welcome').checked) typeStatusMessage(milestoneTexts[next]);
+  }
+}
+
+// ── Idle nudge ────────────────────────────────────────────
+const idleTexts = [
+  'STILL THERE?',
+  'THE PAGE AWAITS.',
+  'YOUR WORDS ARE READY.',
+  'THE CURSOR BLINKS PATIENTLY.',
+  'PRESS ANY KEY TO CONTINUE.',
+  'A BLANK PAGE IS AN OPEN DOOR.'
+];
+let idleTimer = null;
+
+function resetIdleTimer() {
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => {
+    if (document.getElementById('chk-welcome').checked)
+      typeStatusMessage(idleTexts[Math.floor(Math.random() * idleTexts.length)]);
+  }, 3 * 60 * 1000);
+}
+
+document.getElementById('editor').addEventListener('keydown', resetIdleTimer);
+resetIdleTimer();
+
+
 function updateStats() {
   const text  = editor.value;
   const words = text.trim()==='' ? 0 : text.trim().split(/\s+/).length;
   document.getElementById('word-count').textContent = `${words} word${words!==1?'s':''}`;
   document.getElementById('char-count').textContent = `${text.length} char${text.length!==1?'s':''}`;
+  checkMilestone(words);
   const lines = text==='' ? 1 : text.split('\n').length;
   document.getElementById('line-count').textContent = `${lines} line${lines!==1?'s':''}`;
 }
@@ -1137,6 +1271,7 @@ document.getElementById('theme-select').addEventListener('change', function() {
   document.body.dataset.theme = (val==='custom') ? '' : (val || 'parchment');
   document.getElementById('custom-colors').style.display = val==='custom' ? 'flex' : 'none';
   if (val==='custom') applyCustomColors();
+
 });
 
 function applyCustomColors() {
@@ -1729,16 +1864,8 @@ renderTabs();
 restoreAutosave();
 editor.focus();
 
-// ── Welcome message ───────────────────────────────────────────────────
+// ── Welcome message ───────────────────────────────────────
 (function() {
-  const FIRST_BOOT_KEY = 'leaf-booted';
-  const firstBoot      = !localStorage.getItem(FIRST_BOOT_KEY);
-  localStorage.setItem(FIRST_BOOT_KEY, '1');
-
-  // ── Welcome messages ─────────────────────────────────────
-  // First message always shown on first boot.
-  // All messages (including the first) enter the random pool on subsequent boots.
-  // To add more: just append to this array!
   const messages = [
     "Welcome to Leaf... WRITE SOMETHIN' WILL YA!",
     "Welcome to Leaf... CONGLATURATION!!!",
@@ -1750,38 +1877,8 @@ editor.focus();
     "Welcome to Leaf... YOU HAVE PROOVED THE JUSTICE OF OUR CULTURE.",
     "Welcome to Leaf... GO AHEAD DAUNTLESSLY!"
   ];
-  // ─────────────────────────────────────────────────────────
-
-  // Pick randomly from all messages every boot
   if (!document.getElementById('chk-welcome').checked) return;
-  const text = messages[Math.floor(Math.random() * messages.length)];
-
-  const msg     = document.getElementById('welcome-msg');
-  const statDiv = document.querySelector('#statusbar .stat');
-  let   i       = 0;
-
-  document.getElementById('statusbar').style.position = 'relative';
-  statDiv.style.opacity = '0';
-  document.getElementById('cursor-pos').parentElement.style.opacity = '0';
-  document.getElementById('save-indicator').style.opacity = '0';
-
-  msg.style.opacity = '1';
-
-  const typeTimer = setInterval(() => {
-    msg.textContent = text.substring(0, ++i);
-    if (i >= text.length) {
-      clearInterval(typeTimer);
-      setTimeout(() => {
-        msg.style.opacity = '0';
-        setTimeout(() => {
-          msg.style.display = 'none';
-          statDiv.style.opacity = '';
-          document.getElementById('cursor-pos').parentElement.style.opacity = '';
-          document.getElementById('save-indicator').style.opacity = '';
-        }, 500);
-      }, 1200);
-    }
-  }, 45);
+  typeStatusMessage(messages[Math.floor(Math.random() * messages.length)]);
 })();
 
 // ── About modal ──────────────────────────────────────────────────────
