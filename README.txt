@@ -1,6 +1,6 @@
 LEAF: A MARKDOWN EDITOR
 Vibe coded by Dan (c) 2026
-Version 1.4
+Version 1.4.1
 
 ================================================================================
 WHAT IS LEAF?
@@ -228,6 +228,9 @@ restore your last autosaved draft.
 ================================================================================
 CHANGELOG
 ================================================================================
+
+v1.4.1
+  - Bottom scroll padding added so the last line never sits flush against the status bar
 
 v1.4
   - Word count milestone messages (100, 250, 500, 1000, 2000, 5000 words)
