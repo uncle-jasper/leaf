@@ -1,6 +1,6 @@
 LEAF: A MARKDOWN EDITOR
 Vibe coded by Dan (c) 2026
-Version 1.4.1
+Version 1.5
 
 ================================================================================
 WHAT IS LEAF?
@@ -228,6 +228,16 @@ restore your last autosaved draft.
 ================================================================================
 CHANGELOG
 ================================================================================
+
+v1.5
+  - Just Write mode (Ctrl+Shift+J) — for when you need to stop fiddling and
+    actually write. Locks your theme and font for 30 minutes, even across
+    sessions. Write 500 words to earn your freedom early.
+  - A secret amber CRT mode can be unlocked... Anybody up for a game of Contra?
+  - Custom theme colors no longer bleed into other themes when switching
+  - Custom theme colors now persist between sessions
+  - 24px option added to font size selector
+  - Bulleted and numbered lists now hang-indent in preview and split mode
 
 v1.4.1
   - Bottom scroll padding added so the last line never sits flush against the status bar

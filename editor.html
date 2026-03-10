@@ -327,8 +327,8 @@
   #preview h2 { font-size: 1.5em; font-weight: 600; margin: 1em 0 0.3em; }
   #preview h3 { font-size: 1.2em; font-weight: 600; margin: 0.8em 0 0.3em; }
   #preview p { margin: 0.7em 0; }
-  #preview ul, #preview ol { margin: 0.5em 0 0.5em 1.5em; }
-  #preview li { margin: 0.2em 0; }
+  #preview ul, #preview ol { margin: 0.5em 0; padding-left: 1.5em; }
+  #preview li { margin: 0.2em 0; padding-left: 0.3em; }
   #preview blockquote {
     border-left: 3px solid var(--accent);
     padding: 4px 0 4px 16px;
@@ -674,6 +674,46 @@
   }
   body[data-theme="terminal"] #btn-crt-toggle { display: inline-block; }
 
+  /* ── Just Write mode ── */
+  #theme-select:disabled,
+  #font-select:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  body.just-write #btn-crt-toggle {
+    opacity: 0.35;
+    pointer-events: none;
+    cursor: not-allowed;
+  }
+
+  /* ── Amber CRT mode ── */
+  body[data-theme="terminal"].amber-crt { --text:#ffb000; --accent:#7a4a00; --muted:#a06a00; --border:#3a2200; }
+  body[data-theme="terminal"].amber-crt #editor,
+  body[data-theme="terminal"].amber-crt #preview {
+    text-shadow: 0 0 10px rgba(255,176,0,0.55), 0 0 3px rgba(255,176,0,0.7);
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: unset;
+  }
+  body[data-theme="terminal"].amber-crt #statusbar { text-shadow: 0 0 6px rgba(255,176,0,0.4); }
+  body[data-theme="terminal"].amber-crt button,
+  body[data-theme="terminal"].amber-crt select,
+  body[data-theme="terminal"].amber-crt #filename-input { color: var(--text); text-shadow: 0 0 6px rgba(255,176,0,0.3); }
+  body[data-theme="terminal"].amber-crt #editor { caret-color: #ffb000; }
+
+  /* ── Amber CRT mode ── */
+  body[data-theme="terminal"].amber-crt { --text:#ffb000; --accent:#7a4a00; --muted:#a06a00; --border:#3a2200; }
+  body[data-theme="terminal"].amber-crt #editor,
+  body[data-theme="terminal"].amber-crt #preview {
+    text-shadow: 0 0 10px rgba(255,176,0,0.55), 0 0 3px rgba(255,176,0,0.7);
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: unset;
+  }
+  body[data-theme="terminal"].amber-crt #statusbar { text-shadow: 0 0 6px rgba(255,176,0,0.4); }
+  body[data-theme="terminal"].amber-crt button,
+  body[data-theme="terminal"].amber-crt select,
+  body[data-theme="terminal"].amber-crt #filename-input { color: var(--text); text-shadow: 0 0 6px rgba(255,176,0,0.3); }
+  body[data-theme="terminal"].amber-crt #editor { caret-color: #ffb000; }
+
   #btn-about-close {
     font-size: 12px;
     padding: 5px 18px;
@@ -747,6 +787,7 @@
       <option value="18" selected>18px</option>
       <option value="20">20px</option>
       <option value="22">22px</option>
+      <option value="24">24px</option>
     </select>
   </div>
 
@@ -807,7 +848,7 @@
     <p class="about-credit">Vibe coded by Dan</p>
     <p class="about-copy">© 2026</p>
     <button id="btn-about-close">close</button>
-    <p class="about-version">v1.4.1</p>
+    <p class="about-version">v1.5</p>
   <div id="about-welcome-toggle" style="margin-top:14px; display:flex; align-items:center; gap:8px; justify-content:center;">
     <input type="checkbox" id="chk-welcome" style="cursor:pointer; accent-color:var(--accent);" checked>
     <label for="chk-welcome" style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); cursor:pointer; opacity:0.7;">show status messages</label>
@@ -815,7 +856,64 @@
   </div>
 </div>
 
-<script>// ── Status bar typewriter ────────────────────────────────
+<script>
+// ── Just Write mode ──────────────────────────────────────
+const JUST_WRITE_KEY     = 'leaf-just-write-until';
+const JUST_WRITE_WORDS   = 500;
+const JUST_WRITE_MINUTES = 30;
+let justWriteActive    = false;
+let justWriteWordStart = 0;
+
+function activateJustWrite() {
+  const until = Date.now() + JUST_WRITE_MINUTES * 60 * 1000;
+  localStorage.setItem(JUST_WRITE_KEY, until);
+  justWriteActive    = true;
+  justWriteWordStart = editor.value.trim() === '' ? 0 : editor.value.trim().split(/\s+/).length;
+  document.body.classList.add('just-write');
+  document.getElementById('theme-select').disabled = true;
+  document.getElementById('font-select').disabled  = true;
+  typeStatusMessage('JUST WRITE MODE. 30 MINUTES. NO ESCAPE.');
+}
+
+function deactivateJustWrite(msg) {
+  localStorage.removeItem(JUST_WRITE_KEY);
+  justWriteActive = false;
+  document.body.classList.remove('just-write');
+  document.getElementById('theme-select').disabled = false;
+  document.getElementById('font-select').disabled  = false;
+  if (msg) typeStatusMessage(msg);
+}
+
+function checkJustWrite() {
+  const until = parseInt(localStorage.getItem(JUST_WRITE_KEY) || '0');
+  if (until > Date.now()) {
+    justWriteActive    = true;
+    justWriteWordStart = editor.value.trim() === '' ? 0 : editor.value.trim().split(/\s+/).length;
+    document.body.classList.add('just-write');
+    document.getElementById('theme-select').disabled = true;
+    document.getElementById('font-select').disabled  = true;
+  } else if (until) {
+    localStorage.removeItem(JUST_WRITE_KEY);
+  }
+  // Check expiry every minute
+  setTimeout(function tick() {
+    if (!justWriteActive) return;
+    const u = parseInt(localStorage.getItem(JUST_WRITE_KEY) || '0');
+    if (Date.now() >= u) deactivateJustWrite(null);
+    else setTimeout(tick, 10000);
+  }, 60000);
+}
+
+// Check word count for early release
+function checkJustWriteRelease(words) {
+  if (!justWriteActive) return;
+  const wordsWritten = words - justWriteWordStart;
+  if (wordsWritten >= JUST_WRITE_WORDS) {
+    deactivateJustWrite('500 WORDS. YOU HAVE EARNED YOUR FREEDOM.');
+  }
+}
+
+// ── Status bar typewriter ────────────────────────────────
 let statusMsgBusy = false;
 
 function typeStatusMessage(text) {
@@ -1106,12 +1204,24 @@ function resetIdleTimer() {
 
 document.getElementById('editor').addEventListener('keydown', resetIdleTimer);
 resetIdleTimer();
+
+// ── Just Write activation ─────────────────────────────────
+checkJustWrite();
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'J') {
+    e.preventDefault();
+    if (justWriteActive) return;
+    activateJustWrite();
+  }
+});
+
 function updateStats() {
   const text  = editor.value;
   const words = text.trim()==='' ? 0 : text.trim().split(/\s+/).length;
   document.getElementById('word-count').textContent = `${words} word${words!==1?'s':''}`;
   document.getElementById('char-count').textContent = `${text.length} char${text.length!==1?'s':''}`;
   checkMilestone(words);
+  checkJustWriteRelease(words);
   const lines = text==='' ? 1 : text.split('\n').length;
   document.getElementById('line-count').textContent = `${lines} line${lines!==1?'s':''}`;
 }
@@ -1270,10 +1380,12 @@ document.getElementById('theme-select').addEventListener('change', function() {
   document.body.dataset.theme = (val==='custom') ? '' : (val || 'parchment');
   document.getElementById('custom-colors').style.display = val==='custom' ? 'flex' : 'none';
   if (val==='custom') applyCustomColors();
-
+  else clearCustomColors();
+  if (val !== 'terminal') document.body.classList.remove('amber-crt');
 });
 
 function applyCustomColors() {
+  if (document.getElementById('theme-select').value !== 'custom') return;
   const bg     = document.getElementById('color-bg').value;
   const text   = document.getElementById('color-text').value;
   const accent = document.getElementById('color-accent').value;
@@ -1283,6 +1395,12 @@ function applyCustomColors() {
   document.documentElement.style.setProperty('--accent', accent);
   document.documentElement.style.setProperty('--muted',  blendHex(text,bg,0.5));
   document.documentElement.style.setProperty('--border', blendHex(text,bg,0.15));
+}
+
+function clearCustomColors() {
+  ['--bg','--surface','--text','--accent','--muted','--border'].forEach(v =>
+    document.documentElement.style.removeProperty(v)
+  );
 }
 
 function hexToRgb(h){const n=parseInt(h.slice(1),16);return[(n>>16)&255,(n>>8)&255,n&255];}
@@ -1654,11 +1772,12 @@ function loadSettings() {
     if (s.theme !== undefined) {
       document.getElementById('theme-select').value = s.theme;
       document.body.dataset.theme = (s.theme==='custom') ? '' : (s.theme || 'parchment');
+      // Always restore custom color picker values regardless of active theme
+      if (s.customBg)     { document.getElementById('color-bg').value    = s.customBg;     document.getElementById('hex-bg').value    = s.customBg; }
+      if (s.customText)   { document.getElementById('color-text').value  = s.customText;   document.getElementById('hex-text').value  = s.customText; }
+      if (s.customAccent) { document.getElementById('color-accent').value= s.customAccent; document.getElementById('hex-accent').value= s.customAccent; }
       if (s.theme==='custom') {
         document.getElementById('custom-colors').style.display = 'flex';
-        if (s.customBg)     { document.getElementById('color-bg').value    = s.customBg;     document.getElementById('hex-bg').value    = s.customBg; }
-        if (s.customText)   { document.getElementById('color-text').value  = s.customText;   document.getElementById('hex-text').value  = s.customText; }
-        if (s.customAccent) { document.getElementById('color-accent').value= s.customAccent; document.getElementById('hex-accent').value= s.customAccent; }
         applyCustomColors();
       }
     }
@@ -1893,8 +2012,56 @@ document.getElementById('btn-crt-toggle').addEventListener('click', () => {
   const on = document.body.classList.toggle('crt-on');
   const btn = document.getElementById('btn-crt-toggle');
   btn.classList.toggle('crt-off', !on);
+  if (!on) document.body.classList.remove('amber-crt');
   saveSettings();
 });
+
+// ── Konami code → amber CRT ───────────────────────────────
+(function() {
+  const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+  let konamiPos = 0;
+  let konamiStartedOnBlankLine = false;
+
+  // Check blank line on keydown before cursor moves
+  document.getElementById('editor').addEventListener('keydown', e => {
+    if (e.key === KONAMI[0] && konamiPos === 0) {
+      const ed = document.getElementById('editor');
+      const lines = ed.value.split('\n');
+      const lineIndex = ed.value.substring(0, ed.selectionEnd).split('\n').length - 1;
+      konamiStartedOnBlankLine = lines[lineIndex].trim() === '';
+    }
+  });
+
+  document.getElementById('editor').addEventListener('keyup', e => {
+    if (e.key === KONAMI[konamiPos]) {
+      konamiPos++;
+      if (konamiPos === KONAMI.length) {
+        konamiPos = 0;
+        const body = document.body;
+        if (body.dataset.theme !== 'terminal' || !body.classList.contains('crt-on')) return;
+        if (!konamiStartedOnBlankLine) return;
+        if (justWriteActive) return;
+        // Erase the 'ba' typed during the sequence
+        const ed = document.getElementById('editor');
+        const pos = ed.selectionEnd;
+        ed.value = ed.value.substring(0, pos - 2) + ed.value.substring(pos);
+        ed.selectionStart = ed.selectionEnd = pos - 2;
+        // Toggle amber
+        if (body.classList.contains('amber-crt')) {
+          body.classList.remove('amber-crt');
+          typeStatusMessage('GREEN CRT MODE RESTORED.');
+        } else {
+          body.classList.add('amber-crt');
+          typeStatusMessage('AMBER CRT MODE ACTIVATE!!');
+        }
+      }
+    } else {
+      konamiPos = e.key === KONAMI[0] ? 1 : 0;
+    }
+  });
+})();
+
+
 
 document.getElementById('btn-about-close').addEventListener('click', () => {
   document.getElementById('about-overlay').style.display = 'none';
