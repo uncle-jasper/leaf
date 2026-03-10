@@ -1,6 +1,6 @@
 LEAF: A MARKDOWN EDITOR
 Vibe coded by Dan (c) 2026
-Version 1.5
+Version 1.5.1
 
 ================================================================================
 WHAT IS LEAF?
@@ -23,9 +23,6 @@ FILES IN THIS PACKAGE
   sw.js                     Service worker (for offline PWA support)
   leaf-icon-192.png         App icon (192px)
   leaf-icon-512.png         App icon (512px)
-  Leaf.bat                  Windows launcher (opens in Chrome with no browser UI)
-  LeafLauncher-platypus.sh  Mac app launcher script
-  README.txt                This file
 
 Keep all files in the same folder.
 
@@ -37,75 +34,38 @@ GETTING STARTED
 OPTION 1 - Open directly in a browser
 Double-click editor.html. Works in any modern browser.
 
-OPTION 2 - Windows launcher (Chrome)
-Double-click Leaf.bat to open in a clean Chrome window with no browser UI.
-To create a desktop shortcut, right-click Leaf.bat and choose
-Send to > Desktop (create shortcut).
-
-OPTION 3 - Install as a PWA (Chrome / Edge)
+OPTION 2 - Install as a PWA (Chrome / Edge)
 Open https://uncle-jasper.github.io/leaf/editor.html in Chrome or Edge.
 An install button will appear in the address bar or browser menu.
 Click it to install Leaf as a standalone app with its own window and icon.
 Once installed, Leaf works fully offline.
-
-OPTION 4 - Mac app (Platypus)
-See the Mac App section below.
-
-
-================================================================================
-MAC APP (PLATYPUS)
-================================================================================
-
-To run Leaf as a proper native Mac app with a dock icon:
-
-1. Install Platypus (free) from: sveinbjorn.org/platypus
-
-2. Edit LeafLauncher-platypus.sh and set the LEAF_DIR path to your Leaf folder:
-     LEAF_DIR="$HOME/Documents/Leaf"
-
-3. In Platypus:
-   - Script: select LeafLauncher-platypus.sh
-   - App Name: Leaf
-   - Script Type: /bin/zsh
-   - Interface: None
-   - Icon: drag leaf-icon-512.png onto the icon well
-   - Check "Remain running after execution"
-   - Click Create App and save to Applications
-
-4. Drag the app from Applications to your dock.
 
 
 ================================================================================
 THE INTERFACE
 ================================================================================
 
-TOOLBAR
+TOOLBAR (top strip)
   Filename field        Set the name of your file before saving
   save                  Downloads your file (or saves in place in Chrome)
   open                  Load an existing .txt or .md file
   write / split / prev  Switch between write, split, and preview modes
-  Theme menu            Choose your colour theme
+  Theme menu            Choose your color theme
   Font menu             Choose your writing font
   Size menu             Choose your font size
   autohide              Hides toolbar while typing; hover top of screen to show
   focus                 Fullscreen focus mode (Esc or Ctrl+Shift+F to exit)
   ...                   About Leaf
 
-TAB BAR
-  Shows open files as subtle labels below the toolbar.
-  Click a tab to switch files. Click + to open a new tab.
-  Click x on a tab to close it (prompts to save if unsaved changes exist).
-  In autohide mode, the toolbar hides but the tab bar stays visible.
-  In focus mode, both toolbar and tab bar are hidden.
+TAB BAR (below toolbar)
+  Shows open files below the toolbar. Click to switch, + to open new,
+  x to close. In focus mode, the tab bar is hidden.
 
-  AUTOHIDE + TAB BAR BEHAVIOUR
-  When autohide is enabled, clicking into the editor hides the toolbar.
-  The tab bar fades out after 3 seconds of inactivity.
-  Move your mouse within 60px of the top to reveal the tab bar.
-  Move to within 8px of the very top to reveal the full toolbar as well.
-  The pin icon (⊙/⦿) appears in the tab bar once the toolbar has hidden.
-  Click it to pin the tab bar so it never fades. Click again to unpin.
-  Pin state is remembered between sessions.
+  In autohide mode, the toolbar hides when you click into the editor.
+  Move your mouse to the top of the screen to reveal it. The tab bar
+  stays visible and can be pinned (⊙) so it never fades, or unpinned
+  (⦿) to let it fade after a few seconds. Pin state is remembered
+  between sessions.
 
 STATUS BAR
   Shows live word count, character count, line count, and cursor position.
@@ -128,8 +88,9 @@ THEMES
   slate       Dark blue-grey
   terminal    Black with dimmed green phosphor text. Includes an optional
               CRT mode ([CRT] in toolbar) — a fun retro nod to the monochrome
-              green monitors of the 80s.
-  custom      Pick your own colours using the colour picker or hex code input
+              green monitors of the 80s. Rumor has it there's another color
+              hiding in there somewhere.
+  custom      Pick your own colors using the color picker or hex code input
 
 Settings (theme, font, size, autohide, pin state) are remembered between
 sessions.
@@ -139,7 +100,8 @@ sessions.
 FONTS
 ================================================================================
 
-All fonts are embedded in the HTML file and work offline.
+The iA Writer fonts are embedded in the HTML file and work offline.
+All other fonts require an internet connection.
 
   iA Writer Mono      Classic monospaced typewriter feel (default)
   iA Writer Duo       Proportional with a monospace structure
@@ -162,6 +124,7 @@ KEYBOARD SHORTCUTS
   Ctrl+2          Heading 2 (toggle)
   Ctrl+3          Heading 3 (toggle)
   Ctrl+4          Heading 4 (toggle)
+  Ctrl+Shift+J    Toggle Just Write mode
   Ctrl+Shift+F    Toggle focus mode
   Ctrl+Shift+P    Toggle preview mode
   Ctrl+Shift+S    Toggle split view
@@ -171,42 +134,6 @@ KEYBOARD SHORTCUTS
   Ctrl+]          Next tab
   Esc             Exit focus mode / close About dialog
   Tab             Insert two spaces
-
-
-================================================================================
-FOCUS MODE
-================================================================================
-
-Press the focus button or Ctrl+Shift+F to enter fullscreen focus mode.
-Move your mouse to the top of the screen to peek at the toolbar temporarily.
-The status bar fades out and reappears on hover. Press Esc to exit.
-
-
-================================================================================
-AUTOHIDE MODE
-================================================================================
-
-Click autohide to hide the toolbar when you click into the writing area.
-Move your mouse to the very top of the screen to reveal the toolbar.
-It stays visible as long as your mouse is over it, then hides again when
-you move away.
-
-The tab bar stays visible by default in autohide mode (pinned). It fades
-after 3 seconds if unpinned. Move your mouse within 60px of the top to
-bring the tab bar back. Go all the way to the top edge to reveal the
-full toolbar too.
-
-
-================================================================================
-TABS
-================================================================================
-
-Leaf supports multiple open files in a single window via the tab bar.
-Each tab has its own file, content, and save handle. Open a new tab with
-the + button or Ctrl+N. Switch tabs by clicking or with Ctrl+[ and Ctrl+].
-Close a tab with x or Ctrl+W -- if there are unsaved changes you will be
-prompted to save first. A dot appears on the tab name when there are
-unsaved changes.
 
 
 ================================================================================
@@ -226,8 +153,29 @@ restore your last autosaved draft.
 
 
 ================================================================================
+JUST WRITE MODE
+================================================================================
+
+Leaf is, at its core, a writing tool. Just Write mode is a reminder of that.
+
+Press Ctrl+Shift+J to lock your theme and font for 30 minutes, even across
+sessions. The idea is simple: stop tweaking, start writing. No fiddling with
+colors. No hunting for the perfect font. No excuses.
+
+Write 500 words to earn your freedom early.
+
+
+================================================================================
 CHANGELOG
 ================================================================================
+
+v1.5.1
+  - About modal close button replaced with a quiet × in the corner
+  - iOS/Safari fix: status bar no longer creeps upward while typing on-screen keyboard
+  - All status messages now correctly respect the "show status messages" toggle —
+    Just Write and CRT messages were bypassing it
+  - Word count milestone messages now fire only once per session — no longer
+    refire when word count dips below a threshold and climbs back up
 
 v1.5
   - Just Write mode (Ctrl+Shift+J) — for when you need to stop fiddling and
@@ -303,10 +251,10 @@ v1.1
   - Numbered list auto-continue on Enter (increments number automatically)
   - Bullet list auto-continue on Enter (adds dash); double Enter exits list
   - Numbered and bulleted lists render correctly in preview mode
-  - Custom theme hex code input added alongside colour picker
-  - Custom theme colours now persist across sessions
-  - Selection highlight colour matches current theme accent
-  - Editor background colour fixed on mobile browsers
+  - Custom theme hex code input added alongside color picker
+  - Custom theme colors now persist across sessions
+  - Selection highlight color matches current theme accent
+  - Editor background color fixed on mobile browsers
   - iA Writer Mono, Duo, and Quattro fonts embedded directly in the file
   - Replaced Space Mono with Inconsolata in font list
   - Dark theme changed from blue-black to neutral grey-black

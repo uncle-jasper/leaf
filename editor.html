@@ -7,7 +7,6 @@
 <link rel="manifest" href="./leaf.webmanifest">
 <link rel="apple-touch-icon" href="./leaf-icon-192.png">
 <title>Leaf: A Markdown Editor</title>
-<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=Fira+Code:wght@400;500&family=Inconsolata:wght@400;500&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
   @font-face {
     font-family: 'iAWriterMonoS';
@@ -27,6 +26,8 @@
     font-weight: normal;
     font-style: normal;
   }
+            
+
 
   :root {
     --bg: #f5f0e8;
@@ -47,6 +48,7 @@
     font-family: 'Lora', Georgia, serif;
     font-size: var(--font-size);
     height: 100vh;
+    height: 100svh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -620,7 +622,22 @@
     color: var(--text);
     min-width: 260px;
     box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+    position: relative;
   }
+  #btn-about-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1.2em;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.5;
+    padding: 2px 4px;
+  }
+  #btn-about-close:hover { opacity: 1; }
   #about-icon {
     width: 64px;
     height: 64px;
@@ -676,7 +693,11 @@
 
   /* ── Just Write mode ── */
   #theme-select:disabled,
-  #font-select:disabled {
+  #font-select:disabled,
+  #color-bg:disabled,
+  #color-text:disabled,
+  #color-accent:disabled,
+  .hex-input:disabled {
     opacity: 0.35;
     cursor: not-allowed;
   }
@@ -722,6 +743,7 @@
     color: var(--muted);
   }
 </style>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inconsolata:wght@400;500&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 </head>
 <body data-theme="parchment" class="crt-on">
 
@@ -775,7 +797,6 @@
       <option value="'iAWriterDuoS', monospace">iA Writer Duo</option>
       <option value="'iAWriterQuattroS', monospace">iA Writer Quattro</option>
       <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
-      <option value="'Fira Code', monospace">Fira Code</option>
       <option value="'Inconsolata', monospace">Inconsolata</option>
       <option value="'Share Tech Mono', monospace">Share Tech Mono</option>
     </select>
@@ -842,13 +863,14 @@
 <!-- About Modal -->
 <div id="about-overlay" style="display:none">
   <div id="about-modal">
+    <button id="btn-about-close" title="Close">×</button>
     <img id="about-icon" src="data:image/png;base64,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" alt="Leaf icon">
     <h2>Leaf</h2>
     <p class="about-sub">A Markdown Editor</p>
     <p class="about-credit">Vibe coded by Dan</p>
     <p class="about-copy">© 2026</p>
-    <button id="btn-about-close">close</button>
-    <p class="about-version">v1.5</p>
+    <p class="about-version">v1.5.1</p>
+  <p style="margin-top:6px; font-size:11px;"><a href="#" onclick="openReadmeTab(); return false;" style="color:var(--accent); opacity:0.7; text-decoration:none;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">changelog</a></p>
   <div id="about-welcome-toggle" style="margin-top:14px; display:flex; align-items:center; gap:8px; justify-content:center;">
     <input type="checkbox" id="chk-welcome" style="cursor:pointer; accent-color:var(--accent);" checked>
     <label for="chk-welcome" style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); cursor:pointer; opacity:0.7;">show status messages</label>
@@ -857,6 +879,292 @@
 </div>
 
 <script>
+const README_CONTENT = `LEAF: A MARKDOWN EDITOR
+Vibe coded by Dan (c) 2026
+Version 1.5.1
+
+================================================================================
+WHAT IS LEAF?
+================================================================================
+
+Leaf is a lightweight, distraction-free writing tool that runs entirely in your
+web browser as a single HTML file. There's nothing to install, no account to
+create, and no internet connection required. Just open the file and write.
+
+The fonts (iA Writer Mono, Duo, and Quattro) are embedded directly in the HTML
+file, so they work offline and look identical on every machine.
+
+
+================================================================================
+FILES IN THIS PACKAGE
+================================================================================
+
+  editor.html               The editor itself
+  leaf.webmanifest          PWA manifest (for browser installation)
+  sw.js                     Service worker (for offline PWA support)
+  leaf-icon-192.png         App icon (192px)
+  leaf-icon-512.png         App icon (512px)
+
+Keep all files in the same folder.
+
+
+================================================================================
+GETTING STARTED
+================================================================================
+
+OPTION 1 - Open directly in a browser
+Double-click editor.html. Works in any modern browser.
+
+OPTION 2 - Install as a PWA (Chrome / Edge)
+Open https://uncle-jasper.github.io/leaf/editor.html in Chrome or Edge.
+An install button will appear in the address bar or browser menu.
+Click it to install Leaf as a standalone app with its own window and icon.
+Once installed, Leaf works fully offline.
+
+
+================================================================================
+THE INTERFACE
+================================================================================
+
+TOOLBAR (top strip)
+  Filename field        Set the name of your file before saving
+  save                  Downloads your file (or saves in place in Chrome)
+  open                  Load an existing .txt or .md file
+  write / split / prev  Switch between write, split, and preview modes
+  Theme menu            Choose your color theme
+  Font menu             Choose your writing font
+  Size menu             Choose your font size
+  autohide              Hides toolbar while typing; hover top of screen to show
+  focus                 Fullscreen focus mode (Esc or Ctrl+Shift+F to exit)
+  ...                   About Leaf
+
+TAB BAR (below toolbar)
+  Shows open files below the toolbar. Click to switch, + to open new,
+  x to close. In focus mode, the tab bar is hidden.
+
+  In autohide mode, the toolbar hides when you click into the editor.
+  Move your mouse to the top of the screen to reveal it. The tab bar
+  stays visible and can be pinned (⊙) so it never fades, or unpinned
+  (⦿) to let it fade after a few seconds. Pin state is remembered
+  between sessions.
+
+STATUS BAR
+  Shows live word count, character count, line count, and cursor position.
+  When text is selected, shows the word and character count of the selection.
+  Fades out in focus mode and reappears on hover.
+  Displays a random welcome message on launch.
+  Shows milestone messages at 100, 250, 500, 1000, 2000, and 5000 words.
+  Shows a quiet idle nudge after 3 minutes of inactivity.
+  All status messages can be disabled via the toggle in the About modal.
+
+
+================================================================================
+THEMES
+================================================================================
+
+  parchment   Warm cream (default)
+  paper       Cool white with a slight blue-grey tint
+  dark        Near-black with cool grey text
+  moss        Dark green
+  slate       Dark blue-grey
+  terminal    Black with dimmed green phosphor text. Includes an optional
+              CRT mode ([CRT] in toolbar) — a fun retro nod to the monochrome
+              green monitors of the 80s. Rumor has it there's another color
+              hiding in there somewhere.
+  custom      Pick your own colors using the color picker or hex code input
+
+Settings (theme, font, size, autohide, pin state) are remembered between
+sessions.
+
+
+================================================================================
+FONTS
+================================================================================
+
+The iA Writer fonts are embedded in the HTML file and work offline.
+All other fonts require an internet connection.
+
+  iA Writer Mono      Classic monospaced typewriter feel (default)
+  iA Writer Duo       Proportional with a monospace structure
+  iA Writer Quattro   Most proportional of the three, very readable
+  JetBrains Mono      Clean developer monospace
+  Fira Code           Elegant monospace with ligatures
+  Inconsolata         Clean, neutral console font
+  Share Tech Mono     Softer retro monospace
+
+
+================================================================================
+KEYBOARD SHORTCUTS
+================================================================================
+
+  Ctrl+S          Save file
+  Ctrl+B          Bold selected text (**text**)
+  Ctrl+I          Italic selected text (*text*)
+  Ctrl+K          Wrap selection in link [text](url)
+  Ctrl+1          Heading 1 (toggle)
+  Ctrl+2          Heading 2 (toggle)
+  Ctrl+3          Heading 3 (toggle)
+  Ctrl+4          Heading 4 (toggle)
+  Ctrl+Shift+J    Toggle Just Write mode
+  Ctrl+Shift+F    Toggle focus mode
+  Ctrl+Shift+P    Toggle preview mode
+  Ctrl+Shift+S    Toggle split view
+  Ctrl+N          New tab
+  Ctrl+W          Close current tab
+  Ctrl+[          Previous tab
+  Ctrl+]          Next tab
+  Esc             Exit focus mode / close About dialog
+  Tab             Insert two spaces
+
+
+================================================================================
+SAVING
+================================================================================
+
+In Chrome, the first save opens a Save As dialog. Every subsequent save
+writes silently to the same file with no dialog. The status bar flashes
+a saved confirmation.
+
+In Brave and other browsers, each save downloads the file. Name the file
+using the filename field before saving.
+
+Leaf also autosaves your work to browser storage every 30 seconds. If Leaf
+is closed unexpectedly and you reopen it, you will be offered the chance to
+restore your last autosaved draft.
+
+
+================================================================================
+JUST WRITE MODE
+================================================================================
+
+Leaf is, at its core, a writing tool. Just Write mode is a reminder of that.
+
+Press Ctrl+Shift+J to lock your theme and font for 30 minutes, even across
+sessions. The idea is simple: stop tweaking, start writing. No fiddling with
+colors. No hunting for the perfect font. No excuses.
+
+Write 500 words to earn your freedom early.
+
+
+================================================================================
+CHANGELOG
+================================================================================
+
+v1.5.1
+  - About modal close button replaced with a quiet × in the corner
+  - iOS/Safari fix: status bar no longer creeps upward while typing on-screen keyboard
+  - All status messages now correctly respect the "show status messages" toggle —
+    Just Write and CRT messages were bypassing it
+  - Word count milestone messages now fire only once per session — no longer
+    refire when word count dips below a threshold and climbs back up
+
+v1.5
+  - Just Write mode (Ctrl+Shift+J) — for when you need to stop fiddling and
+    actually write. Locks your theme and font for 30 minutes, even across
+    sessions. Write 500 words to earn your freedom early.
+  - A secret amber CRT mode can be unlocked... Anybody up for a game of Contra?
+  - Custom theme colors no longer bleed into other themes when switching
+  - Custom theme colors now persist between sessions
+  - 24px option added to font size selector
+  - Bulleted and numbered lists now hang-indent in preview and split mode
+
+v1.4.1
+  - Bottom scroll padding added so the last line never sits flush against the status bar
+
+v1.4
+  - Word count milestone messages (100, 250, 500, 1000, 2000, 5000 words)
+  - Idle nudge messages after 3 minutes of inactivity
+  - All status messages controlled by a single toggle in the About modal
+  - Editor padding removed top and bottom — text runs flush to toolbar and status bar
+  - Scroll position now shared across all three modes (write, split, preview)
+  - Split view starts at the top of the document on first entry each session
+  - First-time users now correctly land on parchment theme
+  - Focus mode status bar background fixed
+
+v1.3
+  - CRT mode for terminal theme: scanlines, phosphor glow, screen flicker, vignette, pixel text rendering
+  - Underscore cursor in terminal theme for authentic 80s word processor feel
+  - [CRT] toggle in toolbar — only visible in terminal theme, strikethrough when disabled
+  - CRT preference remembered between sessions
+  - Subtle always-on phosphor glow in terminal theme even when CRT is off
+
+v1.2.2
+  - Ctrl+Shift+S toggles split view
+  - Split view scroll sync: editor and preview scroll together in real time
+  - Scroll sync snaps preview into position when entering split mode
+  - Sync toggle button (⇅/↕) on the split divider — click to lock or free scrolling
+  - Last pane scrolled determines sync position when re-enabling scroll lock
+  - Scroll sync preference remembered between sessions
+  - Browser title bar shortened to "Leaf: A Markdown Editor" 
+
+v1.2.1
+  - Welcome message toggle persists correctly between sessions
+  - Tab bar pin state remembered between sessions and across autohide toggles
+  - Theme selector correctly shows saved theme on launch
+  - Parchment set as default theme on first launch
+
+v1.2
+  - Random retro-style welcome message scrolls in the status bar on launch
+  - Welcome message can be disabled via toggle in the About modal
+  - Ctrl+Shift+P toggles preview mode
+  - Ctrl+N opens a new tab
+  - Ctrl+W closes the current tab
+  - Ctrl+1 through Ctrl+4 insert and toggle heading levels
+  - Ctrl+K wraps selection in a markdown link [text](url)
+  - Tab bar pin/unpin in autohide mode (⊙/⦿)
+  - Two-stage autohide reveal: mid zone shows tabs, top edge shows toolbar
+  - Tab bar fades gracefully after inactivity in unpinned autohide mode
+  - Pin state remembered between sessions
+  - Toolbar hides only when clicking into editor (not immediately on toggle)
+  - Paper theme updated to cool white with blue-grey tint
+  - Parchment set as default theme on first launch
+  - Tab name syncs correctly after renaming and saving
+  - Tab bar surface color matches status bar
+  - Placeholder text now adapts to each theme color
+
+v1.1
+
+  - Tabs: multiple files open simultaneously in a single window
+  - Tab bar hides in focus mode, stays visible in autohide mode
+  - Autosave every 30 seconds to browser storage with restore on reopen
+  - Unsaved changes warning when closing the window
+  - Silent save-in-place using File System Access API (Chrome/Edge)
+  - Numbered list auto-continue on Enter (increments number automatically)
+  - Bullet list auto-continue on Enter (adds dash); double Enter exits list
+  - Numbered and bulleted lists render correctly in preview mode
+  - Custom theme hex code input added alongside color picker
+  - Custom theme colors now persist across sessions
+  - Selection highlight color matches current theme accent
+  - Editor background color fixed on mobile browsers
+  - iA Writer Mono, Duo, and Quattro fonts embedded directly in the file
+  - Replaced Space Mono with Inconsolata in font list
+  - Dark theme changed from blue-black to neutral grey-black
+  - Default font changed to iA Writer Mono
+  - Default font size changed to 18px
+  - Editor text wraps correctly when window is narrower than 68 characters
+  - Top and bottom padding reduced to 24px
+  - About popup added (... button in toolbar) with icon, version, and credit
+  - Secret easter egg added
+
+v1.0
+  - Initial release
+  - Markdown editor with write, split, and preview modes
+  - Themes: parchment, paper, dark, moss, slate, terminal, custom
+  - Font and size selection
+  - Focus mode with toolbar peek on mouse-to-top
+  - Autohide toolbar mode
+  - Status bar with word, character, line count and cursor position
+  - Selection word count
+  - PWA support with offline caching
+  - Windows Chrome launcher (Leaf.bat)
+  - Mac Platypus launcher
+
+
+================================================================================
+LEAF IS A SINGLE HTML FILE. NO DATA EVER LEAVES YOUR COMPUTER.
+================================================================================
+`;
+
 // ── Just Write mode ──────────────────────────────────────
 const JUST_WRITE_KEY     = 'leaf-just-write-until';
 const JUST_WRITE_WORDS   = 500;
@@ -872,7 +1180,10 @@ function activateJustWrite() {
   document.body.classList.add('just-write');
   document.getElementById('theme-select').disabled = true;
   document.getElementById('font-select').disabled  = true;
-  typeStatusMessage('JUST WRITE MODE. 30 MINUTES. NO ESCAPE.');
+  ['color-bg','color-text','color-accent','hex-bg','hex-text','hex-accent'].forEach(id => {
+    document.getElementById(id).disabled = true;
+  });
+  if (document.getElementById('chk-welcome').checked) typeStatusMessage('JUST WRITE MODE. 30 MINUTES. NO ESCAPE.');
 }
 
 function deactivateJustWrite(msg) {
@@ -881,7 +1192,10 @@ function deactivateJustWrite(msg) {
   document.body.classList.remove('just-write');
   document.getElementById('theme-select').disabled = false;
   document.getElementById('font-select').disabled  = false;
-  if (msg) typeStatusMessage(msg);
+  ['color-bg','color-text','color-accent','hex-bg','hex-text','hex-accent'].forEach(id => {
+    document.getElementById(id).disabled = false;
+  });
+  if (msg && document.getElementById('chk-welcome').checked) typeStatusMessage(msg);
 }
 
 function checkJustWrite() {
@@ -892,6 +1206,9 @@ function checkJustWrite() {
     document.body.classList.add('just-write');
     document.getElementById('theme-select').disabled = true;
     document.getElementById('font-select').disabled  = true;
+    ['color-bg','color-text','color-accent','hex-bg','hex-text','hex-accent'].forEach(id => {
+      document.getElementById(id).disabled = true;
+    });
   } else if (until) {
     localStorage.removeItem(JUST_WRITE_KEY);
   }
@@ -1168,17 +1485,15 @@ const milestoneTexts  = [
   '2000 WORDS... CONGRATULATION! YOU ARE A GREAT SOLDIER.',
   '5000 WORDS... NOW GO AND REST OUR HEROES!'
 ];
-let lastMilestone = 0;
+const shownMilestones = new Set();
 
 function checkMilestone(words) {
-  if (words < milestones[0]) { lastMilestone = 0; return; }
-  // Find the highest milestone reached that hasn't been shown yet
   let next = -1;
   for (let i = 0; i < milestones.length; i++) {
-    if (words >= milestones[i] && milestones[i] > lastMilestone) next = i;
+    if (words >= milestones[i] && !shownMilestones.has(i)) next = i;
   }
   if (next !== -1) {
-    lastMilestone = milestones[next];
+    shownMilestones.add(next);
     if (document.getElementById('chk-welcome').checked) typeStatusMessage(milestoneTexts[next]);
   }
 }
@@ -1382,6 +1697,7 @@ document.getElementById('theme-select').addEventListener('change', function() {
   if (val==='custom') applyCustomColors();
   else clearCustomColors();
   if (val !== 'terminal') document.body.classList.remove('amber-crt');
+  this.blur();
 });
 
 function applyCustomColors() {
@@ -1887,6 +2203,19 @@ function newTab() {
   switchTab(tab.id);
 }
 
+function openReadmeTab() {
+  document.getElementById('about-overlay').style.display = 'none';
+  saveActiveTabState();
+  const tab = { id: nextTabId++, name: 'README.txt', content: README_CONTENT, handle: null, dirty: false };
+  tabs.push(tab);
+  switchTab(tab.id);
+  requestAnimationFrame(() => {
+    editor.scrollTop = 0;
+    editor.setSelectionRange(0, 0);
+    document.getElementById('editor-scroll').scrollTop = 0;
+  });
+}
+
 async function closeTab(id) {
   const tab = tabs.find(t => t.id === id);
   if (!tab) return;
@@ -2049,10 +2378,10 @@ document.getElementById('btn-crt-toggle').addEventListener('click', () => {
         // Toggle amber
         if (body.classList.contains('amber-crt')) {
           body.classList.remove('amber-crt');
-          typeStatusMessage('GREEN CRT MODE RESTORED.');
+          if (document.getElementById('chk-welcome').checked) typeStatusMessage('GREEN CRT MODE RESTORED.');
         } else {
           body.classList.add('amber-crt');
-          typeStatusMessage('AMBER CRT MODE ACTIVATE!!');
+          if (document.getElementById('chk-welcome').checked) typeStatusMessage('AMBER CRT MODE ACTIVATE!!');
         }
       }
     } else {
