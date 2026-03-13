@@ -1,6 +1,6 @@
 LEAF: A MARKDOWN EDITOR
 Vibe coded by Dan (c) 2026
-Version 1.5.1
+Version 1.5.2
 
 ================================================================================
 WHAT IS LEAF?
@@ -168,6 +168,9 @@ Write 500 words to earn your freedom early.
 ================================================================================
 CHANGELOG
 ================================================================================
+
+v1.5.2
+  - Added donation link to About modal ;)
 
 v1.5.1
   - About modal close button replaced with a quiet × in the corner
