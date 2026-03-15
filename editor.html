@@ -2459,6 +2459,7 @@ async function closeTab(id) {
     lastSavedContent = newActive.dirty ? '' : newActive.content;
     const seedWords = newActive.content.trim() === '' ? 0 : newActive.content.trim().split(/\s+/).length;
     seedMilestones(seedWords);
+    editor.readOnly = newActive.readonly === true;
     updateStats();
     if (currentMode !== 'write') renderPreview();
   }
