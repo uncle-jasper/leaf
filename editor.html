@@ -2137,7 +2137,10 @@ document.addEventListener('mousemove', e => {
         clearTimeout(tabFadeTimer);
       }
     } else {
-      document.body.classList.remove('toolbar-peek');
+      // Don't hide the toolbar while the theme dropdown is open
+      if (document.getElementById('theme-dropdown-menu').style.display === 'none') {
+        document.body.classList.remove('toolbar-peek');
+      }
     }
   }
 
