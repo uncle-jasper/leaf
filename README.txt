@@ -1,6 +1,6 @@
 LEAF: A MARKDOWN EDITOR
 Vibe coded by Dan (c) 2026
-Version 1.5.2
+Version 1.5.3
 
 ================================================================================
 WHAT IS LEAF?
@@ -107,7 +107,6 @@ All other fonts require an internet connection.
   iA Writer Duo       Proportional with a monospace structure
   iA Writer Quattro   Most proportional of the three, very readable
   JetBrains Mono      Clean developer monospace
-  Fira Code           Elegant monospace with ligatures
   Inconsolata         Clean, neutral console font
   Share Tech Mono     Softer retro monospace
 
@@ -169,6 +168,18 @@ Write 500 words to earn your freedom early.
 CHANGELOG
 ================================================================================
 
+v1.5.3
+  - Opening a file no longer overwrites the current tab if it has content —
+    the file opens in a new tab instead
+  - Milestone messages no longer fire for words already present when loading
+    a document — only milestones earned during the current session fire
+  - Theme selector replaced with a custom dropdown — no more white flash
+    when the cursor leaves the menu on Linux and Windows
+  - Just Write mode hardened: word count progress is tied to the tab where
+    the session started, the original word baseline survives page reloads,
+    the release message now always shows even if a milestone message is
+    mid-scroll, and opening the README during a session is blocked
+
 v1.5.2
   - Added donation link to About modal ;)
 
@@ -217,7 +228,7 @@ v1.2.2
   - Sync toggle button (⇅/↕) on the split divider — click to lock or free scrolling
   - Last pane scrolled determines sync position when re-enabling scroll lock
   - Scroll sync preference remembered between sessions
-  - Browser title bar shortened to "Leaf: A Markdown Editor" 
+  - Browser title bar shortened to "Leaf: A Markdown Editor"
 
 v1.2.1
   - Welcome message toggle persists correctly between sessions

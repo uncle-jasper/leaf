@@ -193,6 +193,50 @@
   }
   select:hover { background: var(--border); border-color: var(--muted); }
 
+  /* ── Custom theme dropdown ── */
+  .custom-dropdown {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    color: var(--text);
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    padding: 5px 6px;
+    outline: none;
+    transition: background 0.15s, border-color 0.15s;
+    position: relative;
+    user-select: none;
+  }
+  .custom-dropdown:hover { background: var(--border); border-color: var(--muted); }
+  .custom-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 3px 0;
+    z-index: 1000;
+    min-width: 100%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .custom-dropdown-item {
+    padding: 5px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .custom-dropdown-item:hover { background: var(--border); }
+  .custom-dropdown-item.selected { opacity: 0.5; }
+  .custom-dropdown.disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
   .color-pair {
     display: flex;
     align-items: center;
@@ -718,6 +762,7 @@
   body[data-theme="terminal"].amber-crt #statusbar { text-shadow: 0 0 6px rgba(255,176,0,0.4); }
   body[data-theme="terminal"].amber-crt button,
   body[data-theme="terminal"].amber-crt select,
+  body[data-theme="terminal"].amber-crt .custom-dropdown,
   body[data-theme="terminal"].amber-crt #filename-input { color: var(--text); text-shadow: 0 0 6px rgba(255,176,0,0.3); }
   body[data-theme="terminal"].amber-crt #editor { caret-color: #ffb000; }
 
@@ -732,6 +777,7 @@
   body[data-theme="terminal"].amber-crt #statusbar { text-shadow: 0 0 6px rgba(255,176,0,0.4); }
   body[data-theme="terminal"].amber-crt button,
   body[data-theme="terminal"].amber-crt select,
+  body[data-theme="terminal"].amber-crt .custom-dropdown,
   body[data-theme="terminal"].amber-crt #filename-input { color: var(--text); text-shadow: 0 0 6px rgba(255,176,0,0.3); }
   body[data-theme="terminal"].amber-crt #editor { caret-color: #ffb000; }
 
@@ -763,8 +809,8 @@
       <option value="preview">preview</option>
     </select>
   </div>
-  <div class="tool-group">
-    <select id="theme-select" title="Theme">
+  <div class="tool-group" style="position:relative">
+    <select id="theme-select" title="Theme" style="display:none" aria-hidden="true">
       <option value="parchment" selected>parchment</option>
       <option value="paper">paper</option>
       <option value="dark">dark</option>
@@ -773,6 +819,18 @@
       <option value="terminal">terminal</option>
       <option value="custom">custom…</option>
     </select>
+    <div id="theme-dropdown" class="custom-dropdown" title="Theme">
+      <span id="theme-dropdown-label">parchment</span>
+      <div id="theme-dropdown-menu" class="custom-dropdown-menu" style="display:none">
+        <div class="custom-dropdown-item" data-value="parchment">parchment</div>
+        <div class="custom-dropdown-item" data-value="paper">paper</div>
+        <div class="custom-dropdown-item" data-value="dark">dark</div>
+        <div class="custom-dropdown-item" data-value="moss">moss</div>
+        <div class="custom-dropdown-item" data-value="slate">slate</div>
+        <div class="custom-dropdown-item" data-value="terminal">terminal</div>
+        <div class="custom-dropdown-item" data-value="custom">custom…</div>
+      </div>
+    </div>
   </div>
   <div class="tool-group" id="custom-colors" style="display:none">
     <div class="color-pair">
@@ -869,8 +927,8 @@
     <p class="about-sub">A Markdown Editor</p>
     <p class="about-credit">Vibe coded by Dan</p>
     <p class="about-copy">© 2026</p>
-    <p class="about-version">v1.5.2 · <a href="#" onclick="openReadmeTab(); return false;" style="color:var(--accent); opacity:0.7; text-decoration:none; font-size:11px;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">changelog</a></p>
-  <p style="margin-top:10px; font-size:11px;"><a href="https://buymeacoffee.com/dandanmian" target="_blank" rel="noopener" style="color:var(--accent); opacity:0.7; text-decoration:none;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">☕ buy me a coffee</a></p>
+    <p class="about-version">v1.5.3</p>
+  <p style="margin-top:6px; font-size:11px;"><a href="#" onclick="openReadmeTab(); return false;" style="color:var(--accent); opacity:0.7; text-decoration:none;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">changelog</a></p>
   <div id="about-welcome-toggle" style="margin-top:14px; display:flex; align-items:center; gap:8px; justify-content:center;">
     <input type="checkbox" id="chk-welcome" style="cursor:pointer; accent-color:var(--accent);" checked>
     <label for="chk-welcome" style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); cursor:pointer; opacity:0.7;">show status messages</label>
@@ -881,7 +939,7 @@
 <script>
 const README_CONTENT = `LEAF: A MARKDOWN EDITOR
 Vibe coded by Dan (c) 2026
-Version 1.5.2
+Version 1.5.3
 
 ================================================================================
 WHAT IS LEAF?
@@ -988,7 +1046,6 @@ All other fonts require an internet connection.
   iA Writer Duo       Proportional with a monospace structure
   iA Writer Quattro   Most proportional of the three, very readable
   JetBrains Mono      Clean developer monospace
-  Fira Code           Elegant monospace with ligatures
   Inconsolata         Clean, neutral console font
   Share Tech Mono     Softer retro monospace
 
@@ -1049,6 +1106,18 @@ Write 500 words to earn your freedom early.
 ================================================================================
 CHANGELOG
 ================================================================================
+
+v1.5.3
+  - Opening a file no longer overwrites the current tab if it has content —
+    the file opens in a new tab instead
+  - Milestone messages no longer fire for words already present when loading
+    a document — only milestones earned during the current session fire
+  - Theme selector replaced with a custom dropdown — no more white flash
+    when the cursor leaves the menu on Linux and Windows
+  - Just Write mode hardened: word count progress is tied to the tab where
+    the session started, the original word baseline survives page reloads,
+    the release message now always shows even if a milestone message is
+    mid-scroll, and opening the README during a session is blocked
 
 v1.5.2
   - Added donation link to About modal ;)
@@ -1169,19 +1238,24 @@ LEAF IS A SINGLE HTML FILE. NO DATA EVER LEAVES YOUR COMPUTER.
 `;
 
 // ── Just Write mode ──────────────────────────────────────
-const JUST_WRITE_KEY     = 'leaf-just-write-until';
+const JUST_WRITE_KEY     = 'leaf-just-write-state';
 const JUST_WRITE_WORDS   = 500;
 const JUST_WRITE_MINUTES = 30;
 let justWriteActive    = false;
 let justWriteWordStart = 0;
+let justWriteTabId     = null;
 
 function activateJustWrite() {
   const until = Date.now() + JUST_WRITE_MINUTES * 60 * 1000;
-  localStorage.setItem(JUST_WRITE_KEY, until);
   justWriteActive    = true;
   justWriteWordStart = editor.value.trim() === '' ? 0 : editor.value.trim().split(/\s+/).length;
+  justWriteTabId     = activeTabId;
+  localStorage.setItem(JUST_WRITE_KEY, JSON.stringify({
+    until, tabId: justWriteTabId, wordStart: justWriteWordStart
+  }));
   document.body.classList.add('just-write');
   document.getElementById('theme-select').disabled = true;
+  document.getElementById('theme-dropdown').classList.add('disabled');
   document.getElementById('font-select').disabled  = true;
   ['color-bg','color-text','color-accent','hex-bg','hex-text','hex-accent'].forEach(id => {
     document.getElementById(id).disabled = true;
@@ -1189,47 +1263,73 @@ function activateJustWrite() {
   if (document.getElementById('chk-welcome').checked) typeStatusMessage('JUST WRITE MODE. 30 MINUTES. NO ESCAPE.');
 }
 
-function deactivateJustWrite(msg) {
+function deactivateJustWrite(msg, force) {
   localStorage.removeItem(JUST_WRITE_KEY);
   justWriteActive = false;
+  justWriteTabId  = null;
   document.body.classList.remove('just-write');
   document.getElementById('theme-select').disabled = false;
+  document.getElementById('theme-dropdown').classList.remove('disabled');
   document.getElementById('font-select').disabled  = false;
   ['color-bg','color-text','color-accent','hex-bg','hex-text','hex-accent'].forEach(id => {
     document.getElementById(id).disabled = false;
   });
-  if (msg && document.getElementById('chk-welcome').checked) typeStatusMessage(msg);
+  if (msg && document.getElementById('chk-welcome').checked) {
+    if (force) {
+      // Interrupt any in-progress status message so the release always shows
+      statusMsgBusy = false;
+      const el = document.getElementById('welcome-msg');
+      el.style.opacity = '0';
+      el.style.display = 'none';
+    }
+    typeStatusMessage(msg);
+  }
 }
 
 function checkJustWrite() {
-  const until = parseInt(localStorage.getItem(JUST_WRITE_KEY) || '0');
-  if (until > Date.now()) {
-    justWriteActive    = true;
-    justWriteWordStart = editor.value.trim() === '' ? 0 : editor.value.trim().split(/\s+/).length;
-    document.body.classList.add('just-write');
-    document.getElementById('theme-select').disabled = true;
-    document.getElementById('font-select').disabled  = true;
-    ['color-bg','color-text','color-accent','hex-bg','hex-text','hex-accent'].forEach(id => {
-      document.getElementById(id).disabled = true;
-    });
-  } else if (until) {
+  try {
+    const raw = localStorage.getItem(JUST_WRITE_KEY);
+    if (!raw) return;
+    const state = JSON.parse(raw);
+    const until = state.until || 0;
+    if (until > Date.now()) {
+      justWriteActive    = true;
+      justWriteWordStart = typeof state.wordStart === 'number' ? state.wordStart : 0;
+      justWriteTabId     = state.tabId != null ? state.tabId : activeTabId;
+      document.body.classList.add('just-write');
+      document.getElementById('theme-select').disabled = true;
+      document.getElementById('theme-dropdown').classList.add('disabled');
+      document.getElementById('font-select').disabled  = true;
+      ['color-bg','color-text','color-accent','hex-bg','hex-text','hex-accent'].forEach(id => {
+        document.getElementById(id).disabled = true;
+      });
+    } else {
+      localStorage.removeItem(JUST_WRITE_KEY);
+    }
+  } catch(e) {
     localStorage.removeItem(JUST_WRITE_KEY);
   }
-  // Check expiry every minute
+  // Check expiry every 10 seconds
   setTimeout(function tick() {
     if (!justWriteActive) return;
-    const u = parseInt(localStorage.getItem(JUST_WRITE_KEY) || '0');
-    if (Date.now() >= u) deactivateJustWrite(null);
-    else setTimeout(tick, 10000);
-  }, 60000);
+    try {
+      const raw = localStorage.getItem(JUST_WRITE_KEY);
+      const until = raw ? (JSON.parse(raw).until || 0) : 0;
+      if (Date.now() >= until) deactivateJustWrite(null, false);
+      else setTimeout(tick, 10000);
+    } catch(e) {
+      deactivateJustWrite(null, false);
+    }
+  }, 10000);
 }
 
-// Check word count for early release
+// Check word count for early release — only counts on the tab Just Write started on
 function checkJustWriteRelease(words) {
   if (!justWriteActive) return;
+  if (activeTabId !== justWriteTabId) return;
   const wordsWritten = words - justWriteWordStart;
   if (wordsWritten >= JUST_WRITE_WORDS) {
-    deactivateJustWrite('500 WORDS. YOU HAVE EARNED YOUR FREEDOM.');
+    deactivateJustWrite('500 WORDS. YOU HAVE EARNED YOUR FREEDOM.', true);
   }
 }
 
@@ -1490,6 +1590,12 @@ const milestoneTexts  = [
 ];
 const shownMilestones = new Set();
 
+function seedMilestones(words) {
+  for (let i = 0; i < milestones.length; i++) {
+    if (words >= milestones[i]) shownMilestones.add(i);
+  }
+}
+
 function checkMilestone(words) {
   let next = -1;
   for (let i = 0; i < milestones.length; i++) {
@@ -1632,19 +1738,27 @@ async function openFileWithHandle() {
       const [handle] = await window.showOpenFilePicker({
         types: [{ description: 'Text files', accept: { 'text/plain': ['.txt', '.md'] } }]
       });
+      if (editor.value.trim() !== '') {
+        saveActiveTabState();
+        const fresh = { id: nextTabId++, name: '', content: '', handle: null, dirty: false };
+        tabs.push(fresh);
+        activeTabId = fresh.id;
+        shownMilestones.clear();
+      }
       fileHandle = handle;
       const file = await handle.getFile();
       document.getElementById('filename-input').value = file.name;
       const text = await file.text();
       editor.value = text;
+      const seedWords = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+      seedMilestones(seedWords);
       updateStats();
       markClean();
       if (currentMode !== 'write') renderPreview();
+      renderTabs();
       return true;
     } catch(e) {
-      // AbortError = user cancelled, treat as handled
       if (e.name === 'AbortError') return true;
-      // Any other error — fall through to legacy file input
       return false;
     }
   }
@@ -1673,16 +1787,37 @@ document.getElementById('btn-save').addEventListener('click', saveFile);
 document.getElementById('file-open').addEventListener('change', e => {
   const file = e.target.files[0];
   if (!file) return;
-  document.getElementById('filename-input').value = file.name;
   const reader = new FileReader();
   reader.onload = ev => {
-    fileHandle = null;
-    editor.value = ev.target.result;
-    updateStats();
-    markClean();
-    if (currentMode !== 'write') renderPreview();
-    const tab = getActiveTab();
-    if (tab) { tab.name = file.name; tab.content = ev.target.result; tab.handle = null; tab.dirty = false; renderTabs(); }
+    const text = ev.target.result;
+    const seedWords = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+    if (editor.value.trim() !== '') {
+      saveActiveTabState();
+      const tab = { id: nextTabId++, name: file.name, content: text, handle: null, dirty: false };
+      tabs.push(tab);
+      activeTabId = tab.id;
+      shownMilestones.clear();
+      editor.value = text;
+      document.getElementById('filename-input').value = file.name;
+      fileHandle = null;
+      isDirty = false;
+      lastSavedContent = text;
+      seedMilestones(seedWords);
+      updateStats();
+      markClean();
+      if (currentMode !== 'write') renderPreview();
+      renderTabs();
+    } else {
+      fileHandle = null;
+      editor.value = text;
+      document.getElementById('filename-input').value = file.name;
+      seedMilestones(seedWords);
+      updateStats();
+      markClean();
+      if (currentMode !== 'write') renderPreview();
+      const tab = getActiveTab();
+      if (tab) { tab.name = file.name; tab.content = text; tab.handle = null; tab.dirty = false; renderTabs(); }
+    }
   };
   reader.readAsText(file);
   e.target.value = '';
@@ -1693,6 +1828,48 @@ document.getElementById('btn-open').addEventListener('click', () => {
 });
 
 // ── Theme ─────────────────────────────────────────────────
+
+function syncDropdownLabel() {
+  const val = document.getElementById('theme-select').value || 'parchment';
+  document.getElementById('theme-dropdown-label').textContent = val === 'custom' ? 'custom…' : val;
+  document.querySelectorAll('.custom-dropdown-item').forEach(item => {
+    item.classList.toggle('selected', item.dataset.value === val);
+  });
+}
+
+(function() {
+  const dropdown = document.getElementById('theme-dropdown');
+  const menu     = document.getElementById('theme-dropdown-menu');
+  const select   = document.getElementById('theme-select');
+
+  function setTheme(val) {
+    select.value = val;
+    syncDropdownLabel();
+    select.dispatchEvent(new Event('change'));
+    menu.style.display = 'none';
+  }
+
+  dropdown.addEventListener('click', e => {
+    e.stopPropagation();
+    if (menu.style.display === 'none') {
+      syncDropdownLabel();
+      menu.style.display = 'block';
+    } else {
+      menu.style.display = 'none';
+    }
+  });
+
+  menu.querySelectorAll('.custom-dropdown-item').forEach(item => {
+    item.addEventListener('click', e => {
+      e.stopPropagation();
+      setTheme(item.dataset.value);
+    });
+  });
+
+  document.addEventListener('click', () => { menu.style.display = 'none'; });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') menu.style.display = 'none'; });
+})();
+
 document.getElementById('theme-select').addEventListener('change', function() {
   const val = this.value;
   document.body.dataset.theme = (val==='custom') ? '' : (val || 'parchment');
@@ -2193,6 +2370,8 @@ function switchTab(id) {
   fileHandle = tab.handle;
   isDirty    = tab.dirty;
   lastSavedContent = tab.dirty ? '' : tab.content;
+  const seedWords = tab.content.trim() === '' ? 0 : tab.content.trim().split(/\s+/).length;
+  seedMilestones(seedWords);
   updateStats();
   if (currentMode !== 'write') renderPreview();
   renderTabs();
@@ -2207,6 +2386,7 @@ function newTab() {
 }
 
 function openReadmeTab() {
+  if (justWriteActive) return;
   document.getElementById('about-overlay').style.display = 'none';
   saveActiveTabState();
   const tab = { id: nextTabId++, name: 'README.txt', content: README_CONTENT, handle: null, dirty: false };
@@ -2293,6 +2473,8 @@ function restoreAutosave() {
       if (restore) {
         editor.value = data.content;
         document.getElementById('filename-input').value = data.filename || 'untitled.txt';
+        const seedWords = data.content.trim() === '' ? 0 : data.content.trim().split(/\s+/).length;
+        seedMilestones(seedWords);
         updateStats();
         if (currentMode !== 'write') renderPreview();
       }
@@ -2312,6 +2494,7 @@ window.addEventListener('beforeunload', e => {
 
 // ── Init ──────────────────────────────────────────────────
 loadSettings();
+syncDropdownLabel();
 updateStats();
 renderTabs();
 restoreAutosave();
