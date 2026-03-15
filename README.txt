@@ -1,6 +1,6 @@
 LEAF: A MARKDOWN EDITOR
 Vibe coded by Dan (c) 2026
-Version 1.5.3
+Version 1.5.4
 
 ================================================================================
 WHAT IS LEAF?
@@ -167,6 +167,17 @@ Write 500 words to earn your freedom early.
 ================================================================================
 CHANGELOG
 ================================================================================
+
+v1.5.4
+  - Theme dropdown no longer collapses the toolbar when scrolling through
+    options in autohide mode
+  - Milestone messages no longer fire when closing a tab and switching to
+    the previous one
+  - Just Write sessions now expire correctly even when you're on a different
+    tab at the time
+  - Active Just Write tab is now marked with italic text in the tab bar
+  - About modal restored: version, changelog link, and donation link
+  - README tab is now read-only
 
 v1.5.3
   - Opening a file no longer overwrites the current tab if it has content —

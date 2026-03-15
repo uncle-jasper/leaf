@@ -447,6 +447,7 @@
   .tab.active { opacity: 0.5; color: var(--text); }
   .tab.dirty .tab-name::after { content: ' ·'; font-size: 10px; }
   .tab-name { overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
+  .tab-name.just-write-tab { font-style: italic; }
   .tab-close {
     font-size: 11px;
     color: var(--muted);
@@ -710,7 +711,7 @@
   }
   .about-version {
     color: var(--muted);
-    font-size: 0.72em;
+    font-size: 13px;
     margin-top: 12px;
     opacity: 0.6;
   }
@@ -927,8 +928,8 @@
     <p class="about-sub">A Markdown Editor</p>
     <p class="about-credit">Vibe coded by Dan</p>
     <p class="about-copy">© 2026</p>
-    <p class="about-version">v1.5.3</p>
-  <p style="margin-top:6px; font-size:11px;"><a href="#" onclick="openReadmeTab(); return false;" style="color:var(--accent); opacity:0.7; text-decoration:none;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">changelog</a></p>
+    <p class="about-version"><span style="font-size:13px;">v1.5.4</span> · <a href="#" onclick="openReadmeTab(); return false;" style="font-size:11px; color:var(--accent); opacity:0.7; text-decoration:none;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">changelog</a></p>
+    <p style="margin-top:4px; font-size:11px;"><a href="https://buymeacoffee.com/dandanmian" target="_blank" style="color:var(--accent); opacity:0.7; text-decoration:none;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">☕ buy me a coffee</a></p>
   <div id="about-welcome-toggle" style="margin-top:14px; display:flex; align-items:center; gap:8px; justify-content:center;">
     <input type="checkbox" id="chk-welcome" style="cursor:pointer; accent-color:var(--accent);" checked>
     <label for="chk-welcome" style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); cursor:pointer; opacity:0.7;">show status messages</label>
@@ -939,7 +940,7 @@
 <script>
 const README_CONTENT = `LEAF: A MARKDOWN EDITOR
 Vibe coded by Dan (c) 2026
-Version 1.5.3
+Version 1.5.4
 
 ================================================================================
 WHAT IS LEAF?
@@ -1107,6 +1108,17 @@ Write 500 words to earn your freedom early.
 CHANGELOG
 ================================================================================
 
+v1.5.4
+  - Theme dropdown no longer collapses the toolbar when scrolling through
+    options in autohide mode
+  - Milestone messages no longer fire when closing a tab and switching to
+    the previous one
+  - Just Write sessions now expire correctly even when you're on a different
+    tab at the time
+  - Active Just Write tab is now marked with italic text in the tab bar
+  - About modal restored: version, changelog link, and donation link
+  - README tab is now read-only
+
 v1.5.3
   - Opening a file no longer overwrites the current tab if it has content —
     the file opens in a new tab instead
@@ -1261,6 +1273,7 @@ function activateJustWrite() {
     document.getElementById(id).disabled = true;
   });
   if (document.getElementById('chk-welcome').checked) typeStatusMessage('JUST WRITE MODE. 30 MINUTES. NO ESCAPE.');
+  renderTabs();
 }
 
 function deactivateJustWrite(msg, force) {
@@ -1284,9 +1297,12 @@ function deactivateJustWrite(msg, force) {
     }
     typeStatusMessage(msg);
   }
+  renderTabs();
 }
 
 function checkJustWrite() {
+  // Clean up legacy key from pre-v1.5.3
+  localStorage.removeItem('leaf-just-write-until');
   try {
     const raw = localStorage.getItem(JUST_WRITE_KEY);
     if (!raw) return;
@@ -1309,23 +1325,31 @@ function checkJustWrite() {
   } catch(e) {
     localStorage.removeItem(JUST_WRITE_KEY);
   }
-  // Check expiry every 10 seconds
+  // Check expiry every 2 seconds
   setTimeout(function tick() {
     if (!justWriteActive) return;
     try {
       const raw = localStorage.getItem(JUST_WRITE_KEY);
       const until = raw ? (JSON.parse(raw).until || 0) : 0;
       if (Date.now() >= until) deactivateJustWrite(null, false);
-      else setTimeout(tick, 10000);
+      else setTimeout(tick, 2000);
     } catch(e) {
       deactivateJustWrite(null, false);
     }
-  }, 10000);
+  }, 2000);
 }
 
 // Check word count for early release — only counts on the tab Just Write started on
 function checkJustWriteRelease(words) {
   if (!justWriteActive) return;
+  // Check timer expiry on every call — catches cases where setTimeout was throttled
+  try {
+    const raw = localStorage.getItem(JUST_WRITE_KEY);
+    const until = raw ? (JSON.parse(raw).until || 0) : 0;
+    if (Date.now() >= until) { deactivateJustWrite(null, false); return; }
+  } catch(e) {
+    deactivateJustWrite(null, false); return;
+  }
   if (activeTabId !== justWriteTabId) return;
   const wordsWritten = words - justWriteWordStart;
   if (wordsWritten >= JUST_WRITE_WORDS) {
@@ -2338,7 +2362,7 @@ function renderTabs() {
     el.dataset.id = tab.id;
 
     const name = document.createElement('span');
-    name.className   = 'tab-name';
+    name.className   = 'tab-name' + (justWriteActive && tab.id === justWriteTabId ? ' just-write-tab' : '');
     name.textContent = tab.name;
     name.title       = tab.name;
 
@@ -2375,6 +2399,7 @@ function switchTab(id) {
   lastSavedContent = tab.dirty ? '' : tab.content;
   const seedWords = tab.content.trim() === '' ? 0 : tab.content.trim().split(/\s+/).length;
   seedMilestones(seedWords);
+  editor.readOnly = tab.readonly === true;
   updateStats();
   if (currentMode !== 'write') renderPreview();
   renderTabs();
@@ -2392,7 +2417,7 @@ function openReadmeTab() {
   if (justWriteActive) return;
   document.getElementById('about-overlay').style.display = 'none';
   saveActiveTabState();
-  const tab = { id: nextTabId++, name: 'README.txt', content: README_CONTENT, handle: null, dirty: false };
+  const tab = { id: nextTabId++, name: 'README.txt', content: README_CONTENT, handle: null, dirty: false, readonly: true };
   tabs.push(tab);
   switchTab(tab.id);
   requestAnimationFrame(() => {
@@ -2432,6 +2457,8 @@ async function closeTab(id) {
     fileHandle   = newActive.handle;
     isDirty      = newActive.dirty;
     lastSavedContent = newActive.dirty ? '' : newActive.content;
+    const seedWords = newActive.content.trim() === '' ? 0 : newActive.content.trim().split(/\s+/).length;
+    seedMilestones(seedWords);
     updateStats();
     if (currentMode !== 'write') renderPreview();
   }
