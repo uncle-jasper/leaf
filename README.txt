@@ -1,6 +1,6 @@
 LEAF: A MARKDOWN EDITOR
 Vibe coded by Dan (c) 2026
-Version 1.5.4
+Version 1.6
 
 ================================================================================
 WHAT IS LEAF?
