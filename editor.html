@@ -401,6 +401,7 @@
   #preview a { color: var(--accent); }
   #preview strong { font-weight: 600; }
   #preview em { font-style: italic; }
+  #preview del { opacity: 0.5; text-decoration: line-through; }
   #preview table { border-collapse: collapse; width: 100%; margin: 0.8em 0; }
   #preview th, #preview td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; }
   #preview th { background: var(--surface); font-weight: 600; }
@@ -486,16 +487,6 @@
   #btn-pin-tabs:hover { opacity: 0.6; background: none; }
 
   /* ── Status bar ── */
-  #welcome-msg {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
-    opacity: 0;
-    transition: opacity 0.5s;
-    white-space: nowrap;
-    overflow: hidden;
-  }
-
   #statusbar {
     display: flex;
     align-items: center;
@@ -507,10 +498,37 @@
     font-size: 11px;
     color: var(--muted);
     flex-shrink: 0;
-    gap: 16px;
     transition: background 0.3s, border-color 0.3s;
+    position: relative;
   }
-  #statusbar .stat { display: flex; gap: 12px; }
+  #statusbar .stat-left  { display: flex; gap: 12px; }
+  #statusbar .stat-right { display: flex; gap: 12px; }
+  #statusbar .stat-centre {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  /* Message overlays the centre slot */
+  #welcome-msg {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    opacity: 0;
+    transition: opacity 0.5s;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  #read-time {
+    transition: opacity 0.15s;
+    white-space: nowrap;
+  }
+  #read-time.hidden { opacity: 0; }
   #save-indicator {
     opacity: 0;
     color: var(--accent);
@@ -683,6 +701,78 @@
     padding: 2px 4px;
   }
   #btn-about-close:hover { opacity: 1; }
+
+  /* ── Settings modal ── */
+  #settings-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #settings-modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 36px 48px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text);
+    min-width: 280px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+    position: relative;
+  }
+  #settings-modal h3 {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    opacity: 0.6;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+  }
+  #btn-settings-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1.2em;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.5;
+    padding: 2px 4px;
+  }
+  #btn-settings-close:hover { opacity: 1; }
+  .settings-section {
+    margin-bottom: 20px;
+  }
+  .settings-section:last-child { margin-bottom: 0; }
+  .settings-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .settings-row:last-child { margin-bottom: 0; }
+  .settings-row input[type="checkbox"] {
+    cursor: pointer;
+    accent-color: var(--accent);
+  }
+  .settings-row label {
+    font-size: 10px;
+    color: var(--muted);
+    cursor: pointer;
+    opacity: 0.8;
+  }
+  .settings-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 16px 0;
+    opacity: 0.5;
+  }
   #about-icon {
     width: 64px;
     height: 64px;
@@ -874,6 +964,7 @@
   <div class="tool-group">
     <button id="btn-autohide" title="Auto-hide toolbar while typing">autohide</button>
     <button id="btn-focus" title="Focus mode (Esc to exit)">⛶ focus</button>
+    <button id="btn-settings" title="Settings (Ctrl+,)">settings</button>
     <button id="btn-about" title="About Leaf">···</button>
   <button id="btn-crt-toggle" title="Toggle CRT effects">[CRT]</button>
   </div>
@@ -892,7 +983,7 @@
 
 <div id="main">
   <div id="editor-scroll">
-    <textarea id="editor" spellcheck="true" placeholder="Start writing… markdown is supported."></textarea>
+    <textarea id="editor" spellcheck="true" autocorrect="on" autocapitalize="sentences" placeholder="Start writing… markdown is supported."></textarea>
   </div>
   <div id="split-divider">
     <button id="btn-sync-scroll" title="Toggle scroll sync">⇅</button>
@@ -901,16 +992,17 @@
 </div>
 
 <div id="statusbar">
-  <div id="welcome-msg" style="position:absolute;left:0;right:0;text-align:center;pointer-events:none;"></div>
-  <div class="stat">
+  <div class="stat-left">
     <span id="word-count">0 words</span>
     <span id="char-count">0 chars</span>
     <span id="line-count">1 line</span>
   </div>
-  <div>
+  <div class="stat-centre">
+    <span id="read-time"></span>
     <span id="save-indicator">✓ saved</span>
   </div>
-  <div class="stat">
+  <div id="welcome-msg"></div>
+  <div class="stat-right">
     <span id="cursor-pos">ln 1, col 1</span>
   </div>
 </div>
@@ -918,6 +1010,44 @@
 <!-- Cage Easter Egg -->
 <div id="cage-overlay"></div>
 <!-- cage-src: data:image/webp;base64,UklGRnY... -->
+
+<!-- Settings Modal -->
+<div id="settings-overlay" style="display:none">
+  <div id="settings-modal">
+    <button id="btn-settings-close" title="Close">×</button>
+    <div class="settings-section">
+      <h3>Status bar</h3>
+      <div class="settings-row">
+        <input type="checkbox" id="chk-show-chars" checked>
+        <label for="chk-show-chars">character count</label>
+      </div>
+      <div class="settings-row">
+        <input type="checkbox" id="chk-show-lines" checked>
+        <label for="chk-show-lines">line count</label>
+      </div>
+      <div class="settings-row">
+        <input type="checkbox" id="chk-show-readtime" checked>
+        <label for="chk-show-readtime">reading time</label>
+      </div>
+      <div class="settings-row">
+        <input type="checkbox" id="chk-show-cursor" checked>
+        <label for="chk-show-cursor">cursor position</label>
+      </div>
+    </div>
+    <hr class="settings-divider">
+    <div class="settings-section">
+      <h3>Editor</h3>
+      <div class="settings-row">
+        <input type="checkbox" id="chk-welcome" checked>
+        <label for="chk-welcome">show status messages</label>
+      </div>
+      <div class="settings-row">
+        <input type="checkbox" id="chk-smart-punct">
+        <label for="chk-smart-punct">smart punctuation</label>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- About Modal -->
 <div id="about-overlay" style="display:none">
@@ -928,19 +1058,15 @@
     <p class="about-sub">A Markdown Editor</p>
     <p class="about-credit">Vibe coded by Dan</p>
     <p class="about-copy">© 2026</p>
-    <p class="about-version"><span style="font-size:13px;">v1.5.4</span> · <a href="#" onclick="openReadmeTab(); return false;" style="font-size:11px; color:var(--accent); opacity:0.7; text-decoration:none;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">changelog</a></p>
+    <p class="about-version"><span style="font-size:13px;">v1.5.7</span> · <a href="#" onclick="openReadmeTab(); return false;" style="font-size:11px; color:var(--accent); opacity:0.7; text-decoration:none;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">changelog</a></p>
     <p style="margin-top:4px; font-size:11px;"><a href="https://buymeacoffee.com/dandanmian" target="_blank" style="color:var(--accent); opacity:0.7; text-decoration:none;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">☕ buy me a coffee</a></p>
-  <div id="about-welcome-toggle" style="margin-top:14px; display:flex; align-items:center; gap:8px; justify-content:center;">
-    <input type="checkbox" id="chk-welcome" style="cursor:pointer; accent-color:var(--accent);" checked>
-    <label for="chk-welcome" style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); cursor:pointer; opacity:0.7;">show status messages</label>
-  </div>
   </div>
 </div>
 
 <script>
 const README_CONTENT = `LEAF: A MARKDOWN EDITOR
 Vibe coded by Dan (c) 2026
-Version 1.5.4
+Version 1.5.7
 
 ================================================================================
 WHAT IS LEAF?
@@ -1057,8 +1183,13 @@ KEYBOARD SHORTCUTS
 
   Ctrl+S          Save file
   Ctrl+B          Bold selected text (**text**)
+  Ctrl+Shift+B    Bold+italic selected text (***text***)
   Ctrl+I          Italic selected text (*text*)
+  Ctrl+Shift+X    Strikethrough selected text (~~text~~)
+  Ctrl+\`         Inline code selected text (\`text\`)
   Ctrl+K          Wrap selection in link [text](url)
+  Ctrl+G          Jump to next heading (wraps around)
+  Ctrl+,          Open settings
   Ctrl+1          Heading 1 (toggle)
   Ctrl+2          Heading 2 (toggle)
   Ctrl+3          Heading 3 (toggle)
@@ -1107,6 +1238,39 @@ Write 500 words to earn your freedom early.
 ================================================================================
 CHANGELOG
 ================================================================================
+
+v1.5.7
+  - Ctrl+Shift+X wraps selected text in strikethrough (~~text~~)
+  - Ctrl+Shift+B wraps selected text in bold+italic (***text***)
+  - Strikethrough now renders correctly in preview and split view
+  - Line count moved to left side of status bar with other document stats
+  - Milestone messages no longer lost if the status bar is busy when they
+    fire — they retry on the next keystroke instead
+  - Pasting text now seeds milestones like loading a file — milestones
+    already exceeded by pasted content are suppressed; the next milestone
+    you cross by writing will still fire
+  - Smart quotes detection made more robust across browsers
+  - Auto-close backticks option removed
+  - Settings button label changed to text to match toolbar style
+
+v1.5.6
+  - Settings modal added (Ctrl+,) — replaces the toggles that were in the
+    About modal, which is now credits-only
+  - Status bar customisation: character count, line count, reading time, and
+    cursor position can each be shown or hidden from settings
+  - Reading time moves to the centre of the status bar; fades out gracefully
+    when a status message fires and returns when the message clears
+  - autocorrect and autocapitalize attributes added to editor for mobile
+    Safari support
+
+v1.5.5
+  - Ctrl+\` wraps selected text in inline code backticks
+  - Ctrl+G jumps to the next heading in the document (wraps around)
+  - Smart punctuation option: -- converts to em dash, straight quotes
+    convert to curly quotes (off by default, toggle in About)
+  - Auto-close pairs option: typing * or \` inserts a matching closing
+    character and places the cursor between them (off by default, toggle
+    in About)
 
 v1.5.4
   - Theme dropdown no longer collapses the toolbar when scrolling through
@@ -1293,7 +1457,6 @@ function deactivateJustWrite(msg, force) {
       statusMsgBusy = false;
       const el = document.getElementById('welcome-msg');
       el.style.opacity = '0';
-      el.style.display = 'none';
     }
     typeStatusMessage(msg);
   }
@@ -1364,26 +1527,34 @@ function typeStatusMessage(text) {
   if (statusMsgBusy) return;
   statusMsgBusy = true;
 
-  const msg = document.getElementById('welcome-msg');
+  const msg     = document.getElementById('welcome-msg');
+  const readEl  = document.getElementById('read-time');
   let i = 0;
 
-  msg.style.display = 'block';
-  msg.style.opacity = '1';
-  msg.textContent   = '';
+  // Fade out reading time quickly before message appears
+  readEl.classList.add('hidden');
 
-  const typeTimer = setInterval(() => {
-    msg.textContent = text.substring(0, ++i);
-    if (i >= text.length) {
-      clearInterval(typeTimer);
-      setTimeout(() => {
-        msg.style.opacity = '0';
+  setTimeout(() => {
+    msg.style.opacity = '1';
+    msg.textContent   = '';
+
+    const typeTimer = setInterval(() => {
+      msg.textContent = text.substring(0, ++i);
+      if (i >= text.length) {
+        clearInterval(typeTimer);
         setTimeout(() => {
-          msg.style.display = 'none';
-          statusMsgBusy = false;
-        }, 500);
-      }, 1200);
-    }
-  }, 45);
+          msg.style.opacity = '0';
+          setTimeout(() => {
+            statusMsgBusy = false;
+            // Fade reading time back in only if it's enabled and has content
+            if (document.getElementById('chk-show-readtime').checked && readEl.textContent !== '') {
+              readEl.classList.remove('hidden');
+            }
+          }, 500);
+        }, 1200);
+      }
+    }, 45);
+  }, 150); // small delay to let reading time fade out first
 }
 
 
@@ -1395,6 +1566,7 @@ let saveTimer   = null;
 let autohideEnabled = false;
 let focusActive     = false;
 let focusHintTimer  = null;
+let smartPunctEnabled = false;
 
 // ── Markdown parser (preview pane only) ──────────────────
 function parseMarkdown(md) {
@@ -1413,6 +1585,7 @@ function parseMarkdown(md) {
     .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
     .replace(/\*(.+?)\*/g,'<em>$1</em>')
     .replace(/_(.+?)_/g,'<em>$1</em>')
+    .replace(/~~(.+?)~~/g,'<del>$1</del>')
     .replace(/`([^`]+)`/g,'<code>$1</code>')
     .replace(/!\[([^\]]*)\]\(([^)]+)\)/g,'<img alt="$1" src="$2" style="max-width:100%">')
     .replace(/\[([^\]]*)\]\(([^)]+)\)/g,'<a href="$2" target="_blank">$1</a>')
@@ -1626,6 +1799,7 @@ function checkMilestone(words) {
     if (words >= milestones[i] && !shownMilestones.has(i)) next = i;
   }
   if (next !== -1) {
+    if (statusMsgBusy) return; // busy — don't mark shown, retry on next keystroke
     shownMilestones.add(next);
     if (document.getElementById('chk-welcome').checked) typeStatusMessage(milestoneTexts[next]);
   }
@@ -1666,12 +1840,25 @@ document.addEventListener('keydown', e => {
 function updateStats() {
   const text  = editor.value;
   const words = text.trim()==='' ? 0 : text.trim().split(/\s+/).length;
+  if (justPasted) {
+    seedMilestones(words);
+    justPasted = false;
+  }
   document.getElementById('word-count').textContent = `${words} word${words!==1?'s':''}`;
   document.getElementById('char-count').textContent = `${text.length} char${text.length!==1?'s':''}`;
   checkMilestone(words);
   checkJustWriteRelease(words);
   const lines = text==='' ? 1 : text.split('\n').length;
   document.getElementById('line-count').textContent = `${lines} line${lines!==1?'s':''}`;
+  const readEl = document.getElementById('read-time');
+  if (document.getElementById('chk-show-readtime').checked && words >= 100) {
+    const mins = Math.ceil(words / 200);
+    readEl.textContent = `~${mins} min read`;
+    if (!statusMsgBusy) readEl.classList.remove('hidden');
+  } else {
+    readEl.textContent = '';
+    readEl.classList.add('hidden');
+  }
 }
 
 function updateSelection() {
@@ -1980,7 +2167,23 @@ function wrapSelection(before, after) {
 // ── Cursor bottom padding ────────────────────────────────
 
 
-editor.addEventListener('input', () => {
+editor.addEventListener('input', e => {
+  // Smart quotes — runs on input event to play nicely with IME and autocorrect
+  if (smartPunctEnabled) {
+    const ch = e.data;
+    if (ch === '"' || ch === "'") {
+      const pos      = editor.selectionStart;
+      const val      = editor.value;
+      // Look at the character before the just-inserted quote (pos-1 is the quote itself)
+      const prevChar = pos >= 2 ? val[pos - 2] : '';
+      // Opening if at start of document, after whitespace, or after opening bracket
+      const isOpen   = !prevChar || /[\s\(\[\{'"«]/.test(prevChar);
+      const curly    = ch === '"'
+        ? (isOpen ? '\u201c' : '\u201d')
+        : (isOpen ? '\u2018' : '\u2019');
+      editor.setRangeText(curly, pos - 1, pos, 'end');
+    }
+  }
   updateStats();
   if (currentMode!=='write') renderPreview();
   if (autohideEnabled) {
@@ -1988,6 +2191,9 @@ editor.addEventListener('input', () => {
     document.body.classList.remove('toolbar-peek');
   }
 });
+
+let justPasted = false;
+editor.addEventListener('paste', () => { justPasted = true; });
 
 editor.addEventListener('keyup',  () => { updateCursor(); updateSelection(); });
 editor.addEventListener('click',  () => { updateCursor(); updateSelection(); });
@@ -2000,6 +2206,32 @@ editor.addEventListener('keydown', e => {
   if ((e.ctrlKey||e.metaKey) && e.key==='s') { e.preventDefault(); saveFile(); }
   if ((e.ctrlKey||e.metaKey) && e.key==='b') { e.preventDefault(); wrapSelection('**','**'); }
   if ((e.ctrlKey||e.metaKey) && e.key==='i') { e.preventDefault(); wrapSelection('*','*'); }
+  if ((e.ctrlKey||e.metaKey) && e.key==='`') { e.preventDefault(); wrapSelection('`','`'); }
+  if ((e.ctrlKey||e.metaKey) && e.shiftKey && e.key==='X') { e.preventDefault(); wrapSelection('~~','~~'); }
+  if ((e.ctrlKey||e.metaKey) && e.shiftKey && e.key==='B') { e.preventDefault(); wrapSelection('***','***'); }
+  if ((e.ctrlKey||e.metaKey) && e.key==='g') {
+    e.preventDefault();
+    const text     = editor.value;
+    const pos      = editor.selectionStart;
+    const lines    = text.split('\n');
+    // Build array of heading positions (start of line in overall string)
+    const headings = [];
+    let offset = 0;
+    for (const line of lines) {
+      if (/^#{1,6} /.test(line)) headings.push(offset);
+      offset += line.length + 1;
+    }
+    if (headings.length === 0) return;
+    // Find next heading after cursor (wraps around)
+    let next = headings.find(h => h > pos);
+    if (next === undefined) next = headings[0];
+    editor.setSelectionRange(next, next);
+    // Scroll the heading into view
+    const linesBefore = text.substring(0, next).split('\n').length - 1;
+    const lineHeight  = parseFloat(getComputedStyle(editor).lineHeight) || 28;
+    document.getElementById('editor-scroll').scrollTop = Math.max(0, linesBefore * lineHeight - 100);
+    return;
+  }
   if ((e.ctrlKey||e.metaKey) && e.key==='k') {
     e.preventDefault();
     const pos   = editor.selectionStart;
@@ -2066,6 +2298,19 @@ editor.addEventListener('keydown', e => {
         const next = parseInt(numMatch[1], 10) + 1;
         editor.setRangeText('\n' + next + '. ', pos, pos, 'end');
       }
+      updateStats();
+      if (currentMode !== 'write') renderPreview();
+      return;
+    }
+  }
+
+  // Smart punctuation: -- → em dash, straight quotes → curly
+  if (smartPunctEnabled && !e.ctrlKey && !e.metaKey && e.key === '-') {
+    const pos      = editor.selectionStart;
+    const prevChar = editor.value[pos - 1];
+    if (prevChar === '-') {
+      e.preventDefault();
+      editor.setRangeText('—', pos - 1, pos, 'end');
       updateStats();
       if (currentMode !== 'write') renderPreview();
       return;
@@ -2223,7 +2468,19 @@ function exitFocus() {
 document.getElementById('btn-focus').addEventListener('click', () => focusActive ? exitFocus() : enterFocus());
 
 document.addEventListener('keydown', e => {
-  if (e.key==='Escape' && focusActive) { exitFocus(); return; }
+  if (e.key==='Escape') {
+    if (document.getElementById('settings-overlay').style.display !== 'none') {
+      document.getElementById('settings-overlay').style.display = 'none'; return;
+    }
+    if (document.getElementById('about-overlay').style.display !== 'none') {
+      document.getElementById('about-overlay').style.display = 'none'; return;
+    }
+    if (focusActive) { exitFocus(); return; }
+  }
+  if ((e.ctrlKey||e.metaKey) && e.key === ',') {
+    e.preventDefault();
+    document.getElementById('settings-overlay').style.display = 'flex';
+  }
   if ((e.ctrlKey||e.metaKey) && e.shiftKey && e.key.toLowerCase()==='f') {
     e.preventDefault(); focusActive ? exitFocus() : enterFocus();
   }
@@ -2278,6 +2535,11 @@ function saveSettings() {
     customBg:     document.getElementById('color-bg').value,
     customText:   document.getElementById('color-text').value,
     customAccent: document.getElementById('color-accent').value,
+    smartPunct:   smartPunctEnabled,
+    showChars:    document.getElementById('chk-show-chars').checked,
+    showLines:    document.getElementById('chk-show-lines').checked,
+    showReadtime: document.getElementById('chk-show-readtime').checked,
+    showCursor:   document.getElementById('chk-show-cursor').checked,
   }));
 }
 
@@ -2337,12 +2599,33 @@ function loadSettings() {
       scrollSynced = s.scrollSynced;
       updateSyncIcon();
     }
+    if (s.smartPunct) {
+      smartPunctEnabled = true;
+      document.getElementById('chk-smart-punct').checked = true;
+    }
+    if (s.showChars === false) {
+      document.getElementById('chk-show-chars').checked = false;
+    }
+    if (s.showLines === false) {
+      document.getElementById('chk-show-lines').checked = false;
+    }
+    if (s.showReadtime === false) {
+      document.getElementById('chk-show-readtime').checked = false;
+    }
+    if (s.showCursor === false) {
+      document.getElementById('chk-show-cursor').checked = false;
+    }
+    applyStatusBarVisibility();
   } catch(e) {}
 }
 
 ['theme-select','font-select','font-size-select'].forEach(id => document.getElementById(id).addEventListener('change', saveSettings));
 document.getElementById('btn-autohide').addEventListener('click', saveSettings);
 ['color-bg','color-text','color-accent'].forEach(id => document.getElementById(id).addEventListener('input', saveSettings));
+document.getElementById('chk-smart-punct').addEventListener('change', function() {
+  smartPunctEnabled = this.checked;
+  saveSettings();
+});
 
 // ── Tab management ───────────────────────────────────────────────────
 let tabs = [
@@ -2547,6 +2830,34 @@ editor.focus();
   if (!document.getElementById('chk-welcome').checked) return;
   typeStatusMessage(messages[Math.floor(Math.random() * messages.length)]);
 })();
+
+// ── Settings modal ───────────────────────────────────────
+document.getElementById('btn-settings').addEventListener('click', () => {
+  document.getElementById('settings-overlay').style.display = 'flex';
+});
+document.getElementById('btn-settings-close').addEventListener('click', () => {
+  document.getElementById('settings-overlay').style.display = 'none';
+});
+document.getElementById('settings-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('settings-overlay'))
+    document.getElementById('settings-overlay').style.display = 'none';
+});
+
+// Status bar visibility toggles
+function applyStatusBarVisibility() {
+  document.getElementById('char-count').style.display   = document.getElementById('chk-show-chars').checked   ? '' : 'none';
+  document.getElementById('line-count').style.display   = document.getElementById('chk-show-lines').checked   ? '' : 'none';
+  document.getElementById('cursor-pos').style.display   = document.getElementById('chk-show-cursor').checked  ? '' : 'none';
+  // Reading time: updateStats handles content + visibility
+  updateStats();
+}
+
+['chk-show-chars','chk-show-lines','chk-show-readtime','chk-show-cursor'].forEach(id => {
+  document.getElementById(id).addEventListener('change', () => {
+    applyStatusBarVisibility();
+    saveSettings();
+  });
+});
 
 // ── About modal ──────────────────────────────────────────────────────
 document.getElementById('btn-about').addEventListener('click', () => {
