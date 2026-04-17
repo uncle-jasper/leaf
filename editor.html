@@ -193,7 +193,7 @@
   }
   select:hover { background: var(--border); border-color: var(--muted); }
 
-  /* ── Custom theme dropdown ── */
+  /* ── Custom dropdown (theme selector) ── */
   .custom-dropdown {
     background: transparent;
     border: 1px solid transparent;
@@ -544,7 +544,9 @@
   body[data-theme="dark"]  { --bg:#0a0a0a; --surface:#141414; --text:#d8d8d8; --accent:#444444; --muted:#555555; --border:#222222; }
   body[data-theme="moss"]  { --bg:#1e2420; --surface:#242d28; --text:#d4ddd0; --accent:#82b890; --muted:#607860; --border:#2e3d30; }
   body[data-theme="slate"] { --bg:#1c2333; --surface:#232d40; --text:#d0d8e8; --accent:#7a9fd4; --muted:#5a7090; --border:#2e3d54; }
+  body[data-theme="dusk"]  { --bg:#1e1714; --surface:#261d1a; --text:#e8ddd4; --accent:#b87355; --muted:#7a5c4e; --border:#332520; }
   body[data-theme="paper"] { --bg:#f5f7fa; --surface:#eceef2; --text:#1a1d23; --accent:#4a6080; --muted:#8a96a8; --border:#d4d8e0; }
+  body[data-theme="sage"]   { --bg:#c4d9c4; --surface:#b8cfb8; --text:#162016; --accent:#3a6640; --muted:#4a6050; --border:#a0bfa0; }
   body[data-theme="terminal"] { --bg:#0a0a0a; --surface:#0f0f0f; --text:#22cc22; --accent:#0a5c0a; --muted:#1a7a1a; --border:#1a3a1a; }
   body[data-theme="terminal"] #editor,
   body[data-theme="terminal"] #preview {
@@ -904,9 +906,11 @@
     <select id="theme-select" title="Theme" style="display:none" aria-hidden="true">
       <option value="parchment" selected>parchment</option>
       <option value="paper">paper</option>
+      <option value="sage">sage</option>
       <option value="dark">dark</option>
       <option value="moss">moss</option>
       <option value="slate">slate</option>
+      <option value="dusk">dusk</option>
       <option value="terminal">terminal</option>
       <option value="custom">custom…</option>
     </select>
@@ -915,9 +919,11 @@
       <div id="theme-dropdown-menu" class="custom-dropdown-menu" style="display:none">
         <div class="custom-dropdown-item" data-value="parchment">parchment</div>
         <div class="custom-dropdown-item" data-value="paper">paper</div>
+        <div class="custom-dropdown-item" data-value="sage">sage</div>
         <div class="custom-dropdown-item" data-value="dark">dark</div>
         <div class="custom-dropdown-item" data-value="moss">moss</div>
         <div class="custom-dropdown-item" data-value="slate">slate</div>
+        <div class="custom-dropdown-item" data-value="dusk">dusk</div>
         <div class="custom-dropdown-item" data-value="terminal">terminal</div>
         <div class="custom-dropdown-item" data-value="custom">custom…</div>
       </div>
@@ -1058,7 +1064,7 @@
     <p class="about-sub">A Markdown Editor</p>
     <p class="about-credit">Vibe coded by Dan</p>
     <p class="about-copy">© 2026</p>
-    <p class="about-version"><span style="font-size:13px;">v1.5.7</span> · <a href="#" onclick="openReadmeTab(); return false;" style="font-size:11px; color:var(--accent); opacity:0.7; text-decoration:none;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">changelog</a></p>
+    <p class="about-version"><span style="font-size:13px;">v1.6</span> · <a href="#" onclick="openReadmeTab(); return false;" style="font-size:11px; color:var(--accent); opacity:0.7; text-decoration:none;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">changelog</a></p>
     <p style="margin-top:4px; font-size:11px;"><a href="https://buymeacoffee.com/dandanmian" target="_blank" style="color:var(--accent); opacity:0.7; text-decoration:none;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">☕ buy me a coffee</a></p>
   </div>
 </div>
@@ -1066,7 +1072,7 @@
 <script>
 const README_CONTENT = `LEAF: A MARKDOWN EDITOR
 Vibe coded by Dan (c) 2026
-Version 1.5.7
+Version 1.6
 
 ================================================================================
 WHAT IS LEAF?
@@ -1149,9 +1155,11 @@ THEMES
 
   parchment   Warm cream (default)
   paper       Cool white with a slight blue-grey tint
+  sage        Soft green — unmistakably a green environment
   dark        Near-black with cool grey text
   moss        Dark green
   slate       Dark blue-grey
+  dusk        Warm dark — deep brown-black with terracotta accents
   terminal    Black with dimmed green phosphor text. Includes an optional
               CRT mode ([CRT] in toolbar) — a fun retro nod to the monochrome
               green monitors of the 80s. Rumor has it there's another color
@@ -1239,6 +1247,13 @@ Write 500 words to earn your freedom early.
 CHANGELOG
 ================================================================================
 
+v1.6
+  - New theme: sage — a distinctly green light theme
+  - New theme: dusk — warm dark with deep brown-black background and
+    terracotta accents; the dark counterpart to parchment
+  - Theme selector restored to custom dropdown (swatches trialled and
+    reverted)
+
 v1.5.7
   - Ctrl+Shift+X wraps selected text in strikethrough (~~text~~)
   - Ctrl+Shift+B wraps selected text in bold+italic (***text***)
@@ -1252,6 +1267,10 @@ v1.5.7
   - Smart quotes detection made more robust across browsers
   - Auto-close backticks option removed
   - Settings button label changed to text to match toolbar style
+
+v1.5.8
+  - New theme: dusk — warm dark with deep brown-black background and
+    terracotta accents; the dark counterpart to parchment
 
 v1.5.6
   - Settings modal added (Ctrl+,) — replaces the toggles that were in the
