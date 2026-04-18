@@ -547,6 +547,8 @@
   body[data-theme="dusk"]  { --bg:#1e1714; --surface:#261d1a; --text:#e8ddd4; --accent:#b87355; --muted:#7a5c4e; --border:#332520; }
   body[data-theme="paper"] { --bg:#f5f7fa; --surface:#eceef2; --text:#1a1d23; --accent:#4a6080; --muted:#8a96a8; --border:#d4d8e0; }
   body[data-theme="sage"]   { --bg:#c4d9c4; --surface:#b8cfb8; --text:#162016; --accent:#3a6640; --muted:#4a6050; --border:#a0bfa0; }
+  body[data-theme="sepia"] { --bg:#c8a97e; --surface:#bc9e74; --text:#1e140a; --accent:#6b3f1a; --muted:#7a5535; --border:#a88860; }
+  body[data-theme="ash"]   { --bg:#b0b0b0; --surface:#a4a4a4; --text:#0e0e0e; --accent:#3a3a3a; --muted:#555555; --border:#909090; }
   body[data-theme="terminal"] { --bg:#0a0a0a; --surface:#0f0f0f; --text:#22cc22; --accent:#0a5c0a; --muted:#1a7a1a; --border:#1a3a1a; }
   body[data-theme="terminal"] #editor,
   body[data-theme="terminal"] #preview {
@@ -905,7 +907,9 @@
   <div class="tool-group" style="position:relative">
     <select id="theme-select" title="Theme" style="display:none" aria-hidden="true">
       <option value="parchment" selected>parchment</option>
+      <option value="sepia">sepia</option>
       <option value="paper">paper</option>
+      <option value="ash">ash</option>
       <option value="sage">sage</option>
       <option value="dark">dark</option>
       <option value="moss">moss</option>
@@ -918,7 +922,9 @@
       <span id="theme-dropdown-label">parchment</span>
       <div id="theme-dropdown-menu" class="custom-dropdown-menu" style="display:none">
         <div class="custom-dropdown-item" data-value="parchment">parchment</div>
+        <div class="custom-dropdown-item" data-value="sepia">sepia</div>
         <div class="custom-dropdown-item" data-value="paper">paper</div>
+        <div class="custom-dropdown-item" data-value="ash">ash</div>
         <div class="custom-dropdown-item" data-value="sage">sage</div>
         <div class="custom-dropdown-item" data-value="dark">dark</div>
         <div class="custom-dropdown-item" data-value="moss">moss</div>
@@ -1154,7 +1160,9 @@ THEMES
 ================================================================================
 
   parchment   Warm cream (default)
+  sepia       Rich warm brown — like an old photograph
   paper       Cool white with a slight blue-grey tint
+  ash         Neutral grey — overcast, focused, no colour cast
   sage        Soft green — unmistakably a green environment
   dark        Near-black with cool grey text
   moss        Dark green
@@ -1248,11 +1256,11 @@ CHANGELOG
 ================================================================================
 
 v1.6
-  - New theme: sage — a distinctly green light theme
+  - New theme: sepia — rich warm brown, noticeably deeper than parchment
+  - New theme: ash — fully desaturated mid-grey, like an overcast sky
+  - New theme: sage — distinctly green light theme
   - New theme: dusk — warm dark with deep brown-black background and
     terracotta accents; the dark counterpart to parchment
-  - Theme selector restored to custom dropdown (swatches trialled and
-    reverted)
 
 v1.5.7
   - Ctrl+Shift+X wraps selected text in strikethrough (~~text~~)
