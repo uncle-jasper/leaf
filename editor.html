@@ -809,40 +809,79 @@
     margin-top: 12px;
     opacity: 0.6;
   }
-  #btn-crt-toggle {
-    display: none;
-    font-size: 11px;
+  /* ── Theme label in toolbar ── */
+  #theme-label {
     font-family: 'JetBrains Mono', monospace;
-    padding: 2px 6px;
-    background: none;
-    border: none;
+    font-size: 12px;
     color: var(--text);
-    opacity: 0.6;
+    opacity: 0.8;
     cursor: pointer;
-    transition: opacity 0.15s;
-    text-decoration: none;
-    letter-spacing: 0.05em;
+    padding: 5px 6px;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    transition: opacity 0.15s, background 0.15s, border-color 0.15s;
+    user-select: none;
   }
-  #btn-crt-toggle:hover { opacity: 0.9; background: none; }
-  #btn-crt-toggle.crt-off {
-    opacity: 0.3;
-    text-decoration: line-through;
+  #theme-label:hover { background: var(--border); border-color: var(--muted); opacity: 1; }
+  body.just-write #theme-label { opacity: 0.35; pointer-events: none; cursor: not-allowed; }
+
+  /* ── Settings theme list ── */
+  .settings-theme-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
   }
-  body[data-theme="terminal"] #btn-crt-toggle { display: inline-block; }
+  .settings-theme-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    color: var(--text);
+    opacity: 0.7;
+    transition: opacity 0.1s, background 0.1s;
+  }
+  .settings-theme-item:hover { opacity: 1; background: var(--border); }
+  .settings-theme-item.active { opacity: 1; font-weight: 600; }
+  .theme-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    border: 1px solid rgba(128,128,128,0.2);
+  }
+  .theme-swatch-custom {
+    background: none;
+    border: 1px dashed var(--muted);
+  }
+  .settings-row select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    outline: none;
+    padding: 3px 6px;
+    cursor: pointer;
+  }
+  body.just-write #settings-modal .settings-theme-list,
+  body.just-write #settings-modal #settings-crt-row,
+  body.just-write #settings-modal #settings-font-select,
+  body.just-write #settings-modal #settings-font-size-select {
+    opacity: 0.35;
+    pointer-events: none;
+  }
 
   /* ── Just Write mode ── */
   #theme-select:disabled,
-  #font-select:disabled,
   #color-bg:disabled,
   #color-text:disabled,
   #color-accent:disabled,
   .hex-input:disabled {
     opacity: 0.35;
-    cursor: not-allowed;
-  }
-  body.just-write #btn-crt-toggle {
-    opacity: 0.35;
-    pointer-events: none;
     cursor: not-allowed;
   }
 
@@ -918,59 +957,7 @@
       <option value="terminal">terminal</option>
       <option value="custom">custom…</option>
     </select>
-    <div id="theme-dropdown" class="custom-dropdown" title="Theme">
-      <span id="theme-dropdown-label">parchment</span>
-      <div id="theme-dropdown-menu" class="custom-dropdown-menu" style="display:none">
-        <div class="custom-dropdown-item" data-value="parchment">parchment</div>
-        <div class="custom-dropdown-item" data-value="sepia">sepia</div>
-        <div class="custom-dropdown-item" data-value="paper">paper</div>
-        <div class="custom-dropdown-item" data-value="ash">ash</div>
-        <div class="custom-dropdown-item" data-value="sage">sage</div>
-        <div class="custom-dropdown-item" data-value="dark">dark</div>
-        <div class="custom-dropdown-item" data-value="moss">moss</div>
-        <div class="custom-dropdown-item" data-value="slate">slate</div>
-        <div class="custom-dropdown-item" data-value="dusk">dusk</div>
-        <div class="custom-dropdown-item" data-value="terminal">terminal</div>
-        <div class="custom-dropdown-item" data-value="custom">custom…</div>
-      </div>
-    </div>
-  </div>
-  <div class="tool-group" id="custom-colors" style="display:none">
-    <div class="color-pair">
-      <span>bg</span>
-      <input type="color" id="color-bg" value="#f5f0e8" title="Background color">
-      <input type="text" id="hex-bg" value="#f5f0e8" class="hex-input" maxlength="7" spellcheck="false" title="Background hex">
-    </div>
-    <div class="color-pair">
-      <span>text</span>
-      <input type="color" id="color-text" value="#2c2416" title="Text color">
-      <input type="text" id="hex-text" value="#2c2416" class="hex-input" maxlength="7" spellcheck="false" title="Text hex">
-    </div>
-    <div class="color-pair">
-      <span>accent</span>
-      <input type="color" id="color-accent" value="#8b6e4e" title="Accent color">
-      <input type="text" id="hex-accent" value="#8b6e4e" class="hex-input" maxlength="7" spellcheck="false" title="Accent hex">
-    </div>
-  </div>
-  <div class="tool-group">
-    <select id="font-select" title="Editor font">
-      <option value="'iAWriterMonoS', monospace" selected>iA Writer Mono</option>
-      <option value="'iAWriterDuoS', monospace">iA Writer Duo</option>
-      <option value="'iAWriterQuattroS', monospace">iA Writer Quattro</option>
-      <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
-      <option value="'Inconsolata', monospace">Inconsolata</option>
-      <option value="'Share Tech Mono', monospace">Share Tech Mono</option>
-    </select>
-  </div>
-  <div class="tool-group">
-    <select id="font-size-select" title="Font size">
-      <option value="14">14px</option>
-      <option value="16">16px</option>
-      <option value="18" selected>18px</option>
-      <option value="20">20px</option>
-      <option value="22">22px</option>
-      <option value="24">24px</option>
-    </select>
+    <span id="theme-label" title="Theme (opens settings)">parchment</span>
   </div>
 
   <div class="tool-group">
@@ -978,7 +965,6 @@
     <button id="btn-focus" title="Focus mode (Esc to exit)">⛶ focus</button>
     <button id="btn-settings" title="Settings (Ctrl+,)">settings</button>
     <button id="btn-about" title="About Leaf">···</button>
-  <button id="btn-crt-toggle" title="Toggle CRT effects">[CRT]</button>
   </div>
   <div class="tool-group" id="install-group" style="display:none">
     <button id="btn-install" title="Install Leaf as an app" style="display:none" onclick="installPWA()">⊕ install app</button>
@@ -1028,6 +1014,67 @@
   <div id="settings-modal">
     <button id="btn-settings-close" title="Close">×</button>
     <div class="settings-section">
+      <h3>Appearance</h3>
+      <div class="settings-theme-list">
+        <div class="settings-theme-item" data-value="parchment"><span class="theme-swatch" style="background:#f5f0e8"></span>parchment</div>
+        <div class="settings-theme-item" data-value="sepia"><span class="theme-swatch" style="background:#c8a97e"></span>sepia</div>
+        <div class="settings-theme-item" data-value="paper"><span class="theme-swatch" style="background:#f5f7fa"></span>paper</div>
+        <div class="settings-theme-item" data-value="ash"><span class="theme-swatch" style="background:#b0b0b0"></span>ash</div>
+        <div class="settings-theme-item" data-value="sage"><span class="theme-swatch" style="background:#c4d9c4"></span>sage</div>
+        <div class="settings-theme-item" data-value="dark"><span class="theme-swatch" style="background:#0a0a0a"></span>dark</div>
+        <div class="settings-theme-item" data-value="moss"><span class="theme-swatch" style="background:#1e2420"></span>moss</div>
+        <div class="settings-theme-item" data-value="slate"><span class="theme-swatch" style="background:#1c2333"></span>slate</div>
+        <div class="settings-theme-item" data-value="dusk"><span class="theme-swatch" style="background:#1e1714"></span>dusk</div>
+        <div class="settings-theme-item" data-value="terminal"><span class="theme-swatch" style="background:#0a0a0a;outline:1px solid #1a3a1a"></span>terminal</div>
+        <div class="settings-theme-item" data-value="custom"><span class="theme-swatch theme-swatch-custom"></span>custom…</div>
+      </div>
+      <div id="settings-crt-row" class="settings-row" style="display:none; margin-top:8px;">
+        <input type="checkbox" id="chk-crt">
+        <label for="chk-crt">CRT mode</label>
+      </div>
+      <div id="custom-colors" style="display:none; margin-top:10px;">
+        <div class="color-pair" style="margin-bottom:6px;">
+          <span>bg</span>
+          <input type="color" id="color-bg" value="#f5f0e8" title="Background color">
+          <input type="text" id="hex-bg" value="#f5f0e8" class="hex-input" maxlength="7" spellcheck="false" title="Background hex">
+        </div>
+        <div class="color-pair" style="margin-bottom:6px;">
+          <span>text</span>
+          <input type="color" id="color-text" value="#2c2416" title="Text color">
+          <input type="text" id="hex-text" value="#2c2416" class="hex-input" maxlength="7" spellcheck="false" title="Text hex">
+        </div>
+        <div class="color-pair">
+          <span>accent</span>
+          <input type="color" id="color-accent" value="#8b6e4e" title="Accent color">
+          <input type="text" id="hex-accent" value="#8b6e4e" class="hex-input" maxlength="7" spellcheck="false" title="Accent hex">
+        </div>
+      </div>
+      <hr class="settings-divider" style="margin-top:12px;">
+      <div class="settings-row" style="margin-top:10px;">
+        <label for="settings-font-select" style="min-width:36px;">font</label>
+        <select id="settings-font-select" title="Editor font">
+          <option value="'iAWriterMonoS', monospace" selected>iA Writer Mono</option>
+          <option value="'iAWriterDuoS', monospace">iA Writer Duo</option>
+          <option value="'iAWriterQuattroS', monospace">iA Writer Quattro</option>
+          <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
+          <option value="'Inconsolata', monospace">Inconsolata</option>
+          <option value="'Share Tech Mono', monospace">Share Tech Mono</option>
+        </select>
+      </div>
+      <div class="settings-row" style="margin-top:8px;">
+        <label for="settings-font-size-select" style="min-width:36px;">size</label>
+        <select id="settings-font-size-select" title="Font size">
+          <option value="14">14px</option>
+          <option value="16">16px</option>
+          <option value="18" selected>18px</option>
+          <option value="20">20px</option>
+          <option value="22">22px</option>
+          <option value="24">24px</option>
+        </select>
+      </div>
+    </div>
+    <hr class="settings-divider">
+    <div class="settings-section">
       <h3>Status bar</h3>
       <div class="settings-row">
         <input type="checkbox" id="chk-show-chars" checked>
@@ -1070,7 +1117,7 @@
     <p class="about-sub">A Markdown Editor</p>
     <p class="about-credit">Vibe coded by Dan</p>
     <p class="about-copy">© 2026</p>
-    <p class="about-version"><span style="font-size:13px;">v1.6</span> · <a href="#" onclick="openReadmeTab(); return false;" style="font-size:11px; color:var(--accent); opacity:0.7; text-decoration:none;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">changelog</a></p>
+    <p class="about-version"><span style="font-size:13px;">v1.7</span> · <a href="#" onclick="openReadmeTab(); return false;" style="font-size:11px; color:var(--accent); opacity:0.7; text-decoration:none;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">changelog</a></p>
     <p style="margin-top:4px; font-size:11px;"><a href="https://buymeacoffee.com/dandanmian" target="_blank" style="color:var(--accent); opacity:0.7; text-decoration:none;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">☕ buy me a coffee</a></p>
   </div>
 </div>
@@ -1078,7 +1125,7 @@
 <script>
 const README_CONTENT = `LEAF: A MARKDOWN EDITOR
 Vibe coded by Dan (c) 2026
-Version 1.6
+Version 1.7
 
 ================================================================================
 WHAT IS LEAF?
@@ -1254,6 +1301,17 @@ Write 500 words to earn your freedom early.
 ================================================================================
 CHANGELOG
 ================================================================================
+
+v1.7
+  - Theme selector moved from toolbar to settings modal — toolbar now shows
+    the current theme name as a quiet label that opens settings when clicked
+  - Font and font size moved to settings modal under Appearance
+  - CRT mode toggle moved to settings modal — appears only when terminal
+    theme is active
+  - Settings modal reorganised into Appearance, Status bar, and Editor
+    sections
+  - Theme list in settings shows a colour swatch next to each theme name
+  - Settings modal and Ctrl+, blocked during Just Write mode
 
 v1.6
   - New theme: sepia — rich warm brown, noticeably deeper than parchment
@@ -1458,8 +1516,6 @@ function activateJustWrite() {
   }));
   document.body.classList.add('just-write');
   document.getElementById('theme-select').disabled = true;
-  document.getElementById('theme-dropdown').classList.add('disabled');
-  document.getElementById('font-select').disabled  = true;
   ['color-bg','color-text','color-accent','hex-bg','hex-text','hex-accent'].forEach(id => {
     document.getElementById(id).disabled = true;
   });
@@ -1473,8 +1529,6 @@ function deactivateJustWrite(msg, force) {
   justWriteTabId  = null;
   document.body.classList.remove('just-write');
   document.getElementById('theme-select').disabled = false;
-  document.getElementById('theme-dropdown').classList.remove('disabled');
-  document.getElementById('font-select').disabled  = false;
   ['color-bg','color-text','color-accent','hex-bg','hex-text','hex-accent'].forEach(id => {
     document.getElementById(id).disabled = false;
   });
@@ -1504,8 +1558,6 @@ function checkJustWrite() {
       justWriteTabId     = state.tabId != null ? state.tabId : activeTabId;
       document.body.classList.add('just-write');
       document.getElementById('theme-select').disabled = true;
-      document.getElementById('theme-dropdown').classList.add('disabled');
-      document.getElementById('font-select').disabled  = true;
       ['color-bg','color-text','color-accent','hex-bg','hex-text','hex-accent'].forEach(id => {
         document.getElementById(id).disabled = true;
       });
@@ -2067,55 +2119,54 @@ document.getElementById('btn-open').addEventListener('click', () => {
 
 // ── Theme ─────────────────────────────────────────────────
 
-function syncDropdownLabel() {
+function syncThemeUI() {
   const val = document.getElementById('theme-select').value || 'parchment';
-  document.getElementById('theme-dropdown-label').textContent = val === 'custom' ? 'custom…' : val;
-  document.querySelectorAll('.custom-dropdown-item').forEach(item => {
-    item.classList.toggle('selected', item.dataset.value === val);
+  // Update toolbar label
+  document.getElementById('theme-label').textContent = val === 'custom' ? 'custom…' : val;
+  // Update active state in settings list
+  document.querySelectorAll('.settings-theme-item').forEach(item => {
+    item.classList.toggle('active', item.dataset.value === val);
   });
+  // Show/hide CRT row in settings
+  document.getElementById('settings-crt-row').style.display = val === 'terminal' ? 'flex' : 'none';
+  // Show/hide custom colors
+  document.getElementById('custom-colors').style.display = val === 'custom' ? 'block' : 'none';
 }
 
-(function() {
-  const dropdown = document.getElementById('theme-dropdown');
-  const menu     = document.getElementById('theme-dropdown-menu');
-  const select   = document.getElementById('theme-select');
+function setTheme(val) {
+  if (justWriteActive) return;
+  const select = document.getElementById('theme-select');
+  select.value = val;
+  syncThemeUI();
+  select.dispatchEvent(new Event('change'));
+}
 
-  function setTheme(val) {
-    select.value = val;
-    syncDropdownLabel();
-    select.dispatchEvent(new Event('change'));
-    menu.style.display = 'none';
-  }
+// Theme label in toolbar opens settings
+document.getElementById('theme-label').addEventListener('click', () => {
+  if (justWriteActive) return;
+  document.getElementById('settings-overlay').style.display = 'flex';
+});
 
-  dropdown.addEventListener('click', e => {
-    e.stopPropagation();
-    if (menu.style.display === 'none') {
-      syncDropdownLabel();
-      menu.style.display = 'block';
-    } else {
-      menu.style.display = 'none';
-    }
-  });
-
-  menu.querySelectorAll('.custom-dropdown-item').forEach(item => {
-    item.addEventListener('click', e => {
-      e.stopPropagation();
-      setTheme(item.dataset.value);
-    });
-  });
-
-  document.addEventListener('click', () => { menu.style.display = 'none'; });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') menu.style.display = 'none'; });
-})();
+// Theme list items in settings
+document.querySelectorAll('.settings-theme-item').forEach(item => {
+  item.addEventListener('click', () => setTheme(item.dataset.value));
+});
 
 document.getElementById('theme-select').addEventListener('change', function() {
   const val = this.value;
   document.body.dataset.theme = (val==='custom') ? '' : (val || 'parchment');
-  document.getElementById('custom-colors').style.display = val==='custom' ? 'flex' : 'none';
   if (val==='custom') applyCustomColors();
   else clearCustomColors();
   if (val !== 'terminal') document.body.classList.remove('amber-crt');
-  this.blur();
+  syncThemeUI();
+  saveSettings();
+});
+
+// CRT toggle in settings
+document.getElementById('chk-crt').addEventListener('change', function() {
+  document.body.classList.toggle('crt-on', this.checked);
+  if (!this.checked) document.body.classList.remove('amber-crt');
+  saveSettings();
 });
 
 function applyCustomColors() {
@@ -2150,7 +2201,6 @@ function blendHex(f,b,t){const[r1,g1,b1]=hexToRgb(f);const[r2,g2,b2]=hexToRgb(b)
     hex.value = picker.value;
     applyCustomColors();
   });
-  // Sync hex input → color picker
   hex.addEventListener('input', () => {
     const val = hex.value.trim();
     if (/^#[0-9a-fA-F]{6}$/.test(val)) {
@@ -2159,7 +2209,6 @@ function blendHex(f,b,t){const[r1,g1,b1]=hexToRgb(f);const[r2,g2,b2]=hexToRgb(b)
     }
   });
   hex.addEventListener('blur', () => {
-    // Normalize on blur — if invalid, reset to current picker value
     if (!/^#[0-9a-fA-F]{6}$/.test(hex.value.trim())) {
       hex.value = picker.value;
     }
@@ -2167,13 +2216,15 @@ function blendHex(f,b,t){const[r1,g1,b1]=hexToRgb(f);const[r2,g2,b2]=hexToRgb(b)
 });
 
 // ── Font / Size ───────────────────────────────────────────
-document.getElementById('font-select').addEventListener('change', function() {
+document.getElementById('settings-font-select').addEventListener('change', function() {
   document.documentElement.style.setProperty('--editor-font', this.value);
   const weight = this.value.includes('iAWriter') ? '700' : '400';
   document.documentElement.style.setProperty('--editor-weight', weight);
+  saveSettings();
 });
-document.getElementById('font-size-select').addEventListener('change', function() {
+document.getElementById('settings-font-size-select').addEventListener('change', function() {
   document.documentElement.style.setProperty('--font-size', this.value+'px');
+  saveSettings();
 });
 
 // ── Formatting helpers ────────────────────────────────────
@@ -2433,8 +2484,8 @@ document.addEventListener('mousemove', e => {
         clearTimeout(tabFadeTimer);
       }
     } else {
-      // Don't hide the toolbar while the theme dropdown is open
-      if (document.getElementById('theme-dropdown-menu').style.display === 'none') {
+      // Don't hide toolbar while settings overlay is open
+      if (document.getElementById('settings-overlay').style.display === 'none') {
         document.body.classList.remove('toolbar-peek');
       }
     }
@@ -2506,7 +2557,7 @@ document.addEventListener('keydown', e => {
   }
   if ((e.ctrlKey||e.metaKey) && e.key === ',') {
     e.preventDefault();
-    document.getElementById('settings-overlay').style.display = 'flex';
+    if (!justWriteActive) document.getElementById('settings-overlay').style.display = 'flex';
   }
   if ((e.ctrlKey||e.metaKey) && e.shiftKey && e.key.toLowerCase()==='f') {
     e.preventDefault(); focusActive ? exitFocus() : enterFocus();
@@ -2552,8 +2603,8 @@ function saveSettings() {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify({
     version:      2,
     theme:        document.getElementById('theme-select').value,
-    font:         document.getElementById('font-select').value,
-    fontSize:     document.getElementById('font-size-select').value,
+    font:         document.getElementById('settings-font-select').value,
+    fontSize:     document.getElementById('settings-font-size-select').value,
     autohide:     autohideEnabled,
     tabPinned:    tabBarPinned,
     showWelcome:  document.getElementById('chk-welcome').checked,
@@ -2589,18 +2640,18 @@ function loadSettings() {
       if (s.customText)   { document.getElementById('color-text').value  = s.customText;   document.getElementById('hex-text').value  = s.customText; }
       if (s.customAccent) { document.getElementById('color-accent').value= s.customAccent; document.getElementById('hex-accent').value= s.customAccent; }
       if (s.theme==='custom') {
-        document.getElementById('custom-colors').style.display = 'flex';
+        document.getElementById('custom-colors').style.display = 'block';
         applyCustomColors();
       }
     }
     if (s.font) {
-      document.getElementById('font-select').value = s.font;
+      document.getElementById('settings-font-select').value = s.font;
       document.documentElement.style.setProperty('--editor-font', s.font);
       const weight = s.font.includes('iAWriter') ? '700' : '400';
       document.documentElement.style.setProperty('--editor-weight', weight);
     }
     if (s.fontSize) {
-      document.getElementById('font-size-select').value = s.fontSize;
+      document.getElementById('settings-font-size-select').value = s.fontSize;
       document.documentElement.style.setProperty('--font-size', s.fontSize+'px');
     }
     if (s.autohide) {
@@ -2615,12 +2666,11 @@ function loadSettings() {
     if (s.showWelcome !== undefined) {
       document.getElementById('chk-welcome').checked = s.showWelcome;
     }
-    const btn = document.getElementById('btn-crt-toggle');
     if (s.crtEnabled !== undefined && !s.crtEnabled) {
       document.body.classList.remove('crt-on');
-      btn.classList.add('crt-off');
+      document.getElementById('chk-crt').checked = false;
     } else {
-      btn.classList.remove('crt-off');
+      document.getElementById('chk-crt').checked = true;
     }
     if (s.scrollSynced !== undefined) {
       scrollSynced = s.scrollSynced;
@@ -2643,10 +2693,11 @@ function loadSettings() {
       document.getElementById('chk-show-cursor').checked = false;
     }
     applyStatusBarVisibility();
+    syncThemeUI();
   } catch(e) {}
 }
 
-['theme-select','font-select','font-size-select'].forEach(id => document.getElementById(id).addEventListener('change', saveSettings));
+['theme-select'].forEach(id => document.getElementById(id).addEventListener('change', saveSettings));
 document.getElementById('btn-autohide').addEventListener('click', saveSettings);
 ['color-bg','color-text','color-accent'].forEach(id => document.getElementById(id).addEventListener('input', saveSettings));
 document.getElementById('chk-smart-punct').addEventListener('change', function() {
@@ -2835,7 +2886,7 @@ window.addEventListener('beforeunload', e => {
 
 // ── Init ──────────────────────────────────────────────────
 loadSettings();
-syncDropdownLabel();
+syncThemeUI();
 updateStats();
 renderTabs();
 restoreAutosave();
@@ -2860,6 +2911,7 @@ editor.focus();
 
 // ── Settings modal ───────────────────────────────────────
 document.getElementById('btn-settings').addEventListener('click', () => {
+  if (justWriteActive) return;
   document.getElementById('settings-overlay').style.display = 'flex';
 });
 document.getElementById('btn-settings-close').addEventListener('click', () => {
@@ -2891,14 +2943,6 @@ document.getElementById('btn-about').addEventListener('click', () => {
   document.getElementById('about-overlay').style.display = 'flex';
 });
 document.getElementById('chk-welcome').addEventListener('change', saveSettings);
-
-document.getElementById('btn-crt-toggle').addEventListener('click', () => {
-  const on = document.body.classList.toggle('crt-on');
-  const btn = document.getElementById('btn-crt-toggle');
-  btn.classList.toggle('crt-off', !on);
-  if (!on) document.body.classList.remove('amber-crt');
-  saveSettings();
-});
 
 // ── Konami code → amber CRT ───────────────────────────────
 (function() {
